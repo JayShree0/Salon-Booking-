@@ -20,4 +20,6 @@ public interface SalonService {
 
     List<Salon> searchSalonByCity(String city);
 
+    void deleteSalon(Long salonId) throws Exception;
+
 }

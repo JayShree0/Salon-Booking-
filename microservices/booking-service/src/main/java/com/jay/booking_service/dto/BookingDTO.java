@@ -16,4 +16,5 @@ public class BookingDTO {
     private LocalDateTime endTime;
     private Set<Long> serviceIds;
     private BookingStatus status = BookingStatus.PENDING;
+    private int totalPrice;
 }

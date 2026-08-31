@@ -16,6 +16,7 @@ public class BookingMapper {
         bookingDTO.setStartTime(booking.getStartTime());
         
         bookingDTO.setServiceIds(booking.getServiceIds());
+        bookingDTO.setTotalPrice(booking.getTotalPrice());
         return bookingDTO;
     }
 }

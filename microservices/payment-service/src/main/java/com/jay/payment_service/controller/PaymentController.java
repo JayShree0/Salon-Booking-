@@ -6,6 +6,7 @@ import com.jay.payment_service.dto.UserDTO;
 import com.jay.payment_service.model.PaymentOrder;
 import com.jay.payment_service.response.PaymentLinkResponse;
 import com.jay.payment_service.service.PaymentService;
+import com.jay.payment_service.service.client.UserFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,16 +17,16 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final UserFeignClient userFeignClient;
 
     @PostMapping("/create")
     public ResponseEntity<PaymentLinkResponse> createPaymentLink(
             @RequestBody BookingDTO booking,
-            @RequestParam PaymentMethod paymentMethod
+            @RequestParam PaymentMethod paymentMethod,
+            @RequestHeader("Authorization") String jwt
     ) throws Exception {
-        UserDTO user = new UserDTO();
-        user.setId(1L);
-        user.setFullName("Jay");
-        user.setEmail("jayshree980@gmail.com");
+        UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
+
 
         PaymentLinkResponse response = paymentService.createOrder(
                 user,

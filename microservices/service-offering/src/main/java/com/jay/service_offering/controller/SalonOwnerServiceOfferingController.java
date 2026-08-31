@@ -5,6 +5,8 @@ import com.jay.service_offering.dto.SalonDTO;
 import com.jay.service_offering.dto.ServiceDTO;
 import com.jay.service_offering.model.ServiceOffering;
 import com.jay.service_offering.service.ServiceOfferingService;
+import com.jay.service_offering.service.client.CategoryFeignClient;
+import com.jay.service_offering.service.client.SalonFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,16 +19,30 @@ import java.util.Set;
 public class SalonOwnerServiceOfferingController {
 
     private final ServiceOfferingService serviceOfferingService;
+    private final SalonFeignClient salonFeignClient;
+    private final CategoryFeignClient categoryFeignClient;
+
+    @GetMapping
+    public ResponseEntity<Set<ServiceOffering>> getServicesForSalonOwner(
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception {
+        SalonDTO salonDTO = salonFeignClient.getSalonByOwnerId(jwt).getBody();
+
+        Set<ServiceOffering> serviceOfferings = serviceOfferingService
+                .getAllServiceBySalonId(salonDTO.getId(), null);
+
+        return ResponseEntity.ok(serviceOfferings);
+    }
 
     @PostMapping
     public ResponseEntity<ServiceOffering> createService(
-            @RequestBody ServiceDTO serviceDTO)
+            @RequestBody ServiceDTO serviceDTO,
+            @RequestHeader("Authorization") String jwt) throws Exception
     {
-        SalonDTO salonDTO = new SalonDTO();
-        salonDTO.setId(1L);
+        SalonDTO salonDTO = salonFeignClient.getSalonByOwnerId(jwt).getBody();
 
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setId(serviceDTO.getCategory());
+        CategoryDTO categoryDTO = categoryFeignClient
+                .getCategoriesByIdAndSalon(serviceDTO.getCategory(), salonDTO.getId()).getBody();
 
         ServiceOffering serviceOfferings = serviceOfferingService
                 .createService(salonDTO, serviceDTO, categoryDTO);

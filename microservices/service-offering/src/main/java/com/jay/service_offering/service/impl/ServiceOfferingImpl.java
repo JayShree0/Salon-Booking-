@@ -25,7 +25,7 @@ public class ServiceOfferingImpl implements ServiceOfferingService {
         ServiceOffering serviceOffering = new ServiceOffering();
         serviceOffering.setImage(serviceDTO.getImage());
         serviceOffering.setSalonId(salonDTO.getId());
-        serviceOffering.setName(serviceDTO.getImage());
+        serviceOffering.setName(serviceDTO.getName());
         serviceOffering.setDescription(serviceDTO.getDescription());
         serviceOffering.setCategoryId(categoryDTO.getId());
         serviceOffering.setPrice(serviceDTO.getPrice());
@@ -43,7 +43,7 @@ public class ServiceOfferingImpl implements ServiceOfferingService {
             throw new Exception("Service not exists with id " + serviceId);
         }
         serviceOffering.setImage(service.getImage());
-        serviceOffering.setName(service.getImage());
+        serviceOffering.setName(service.getName());
         serviceOffering.setDescription(service.getDescription());
         serviceOffering.setPrice(service.getPrice());
         serviceOffering.setDuration(service.getDuration());

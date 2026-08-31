@@ -1,7 +1,8 @@
 package com.jay.user_service.service;
 
-import com.jay.user_service.dto.UserRequestDto;
-import com.jay.user_service.dto.UserResponseDto;
+import com.jay.user_service.model.User;
+import com.jay.user_service.payload.dto.UserRequestDto;
+import com.jay.user_service.payload.response.UserResponseDto;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface UserService {
     UserResponseDto updateUser(Long id, UserRequestDto request);
 
     void deleteUser(Long id);
+
+    User getUserFromJwt(String jwt) throws Exception;
 }

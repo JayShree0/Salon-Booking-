@@ -1,11 +1,10 @@
 package com.jay.user_service.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.jay.user_service.domain.UserRole;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,8 +31,8 @@ public class User {
     @NotBlank(message = "username is mandatory")
     private String username;
 
-    @NotBlank(message = "role is mandatory")
-    private String role;
+    @Column(nullable = false)
+    private UserRole role;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -42,9 +41,5 @@ public class User {
     private LocalDateTime updatedAt;
 
     @NotBlank(message = "Password is mandatory")
-    @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&]).{8,}$",
-            message = "Password must be at least 8 characters long and include at least one letter, one number, and one special character"
-    )
     private String password;
 }

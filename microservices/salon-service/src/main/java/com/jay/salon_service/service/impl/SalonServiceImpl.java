@@ -78,6 +78,17 @@ public class SalonServiceImpl implements SalonService {
         return salonRepository.searchSalons(city);
     }
 
+    @Override
+    public void deleteSalon(Long salonId) throws Exception {
+
+        Salon salon = salonRepository.findById(salonId)
+                .orElseThrow(() ->
+                        new Exception("Salon not found with id: " + salonId));
+
+        salonRepository.deleteById(salonId);
+    }
+
+
     private Salon mapToEntity(SalonDTO salonDTO) {
 
         Salon salon = new Salon();

@@ -5,6 +5,7 @@ import com.jay.salon_service.dto.UserDTO;
 import com.jay.salon_service.mapper.SalonMapper;
 import com.jay.salon_service.model.Salon;
 import com.jay.salon_service.service.SalonService;
+import com.jay.salon_service.service.client.UserFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +18,15 @@ import java.util.List;
 public class SalonController {
 
     private final SalonService salonService;
+    private final UserFeignClient userFeignClient;
 
     // http://localhost:5002/api/salons
     @PostMapping
-    public ResponseEntity<SalonDTO> createSalon(@RequestBody SalonDTO salonDTO) {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(1L);
-        /*
-        i am creating static dto .. because when we integrate eclock in our application we will get one jwt token inside request header.. wha se we will grab the userId [details]
-         */
+    public ResponseEntity<SalonDTO> createSalon(
+            @RequestBody SalonDTO salonDTO,
+            @RequestHeader("Authorization") String jwt) throws Exception {
+        UserDTO userDTO = userFeignClient.getUserProfile(jwt).getBody();
+
         Salon salon = salonService.createSalon(salonDTO, userDTO);
         SalonDTO salonDTO1 = SalonMapper.mapToDto(salon);
         return ResponseEntity.ok(salonDTO1);
@@ -34,12 +35,10 @@ public class SalonController {
     @PutMapping("/{salonId}")
     public ResponseEntity<SalonDTO> updateSalon(
             @PathVariable Long salonId,
-            @RequestBody SalonDTO salonDTO) throws Exception {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(1L);
-        /*
-        i am creating static dto .. because when we integrate eclock in our application we will get one jwt token inside request header.. wha se we will grab the userId [details]
-         */
+            @RequestBody SalonDTO salonDTO,
+            @RequestHeader("Authorization") String jwt) throws Exception {
+
+        UserDTO userDTO = userFeignClient.getUserProfile(jwt).getBody();
         Salon salon = salonService.updateSalon(salonDTO, userDTO, salonId);
         SalonDTO salonDTO1 = SalonMapper.mapToDto(salon);
         return ResponseEntity.ok(salonDTO1);
@@ -49,11 +48,11 @@ public class SalonController {
     @GetMapping
     public ResponseEntity<List<SalonDTO>> getSalons(
     ) throws Exception {
+
+        /*
         UserDTO userDTO = new UserDTO();
         userDTO.setId(1L);
-        /*
-        i am creating static dto, because when we integrate keyClock in our application we will get one jwt token inside request header.. wha se we will grab the userId [details]
-         */
+
         List<Salon> salons = salonService.getAllSalons();
 
         List<SalonDTO> salonDTOS = salons
@@ -65,6 +64,15 @@ public class SalonController {
                 .toList();
 
         return ResponseEntity.ok(salonDTOS);
+
+        */
+        List<Salon> salons = salonService.getAllSalons();
+        List<SalonDTO> salonDTOS = salons.stream().map((salon -> {
+            SalonDTO salonDTO = SalonMapper.mapToDto(salon);
+            return salonDTO;
+        })).toList();
+
+        return ResponseEntity.ok(salonDTOS);
     }
 
     // search the salon
@@ -72,8 +80,6 @@ public class SalonController {
     public ResponseEntity<List<SalonDTO>> searchSalons(
             @RequestParam("city") String city
     ) throws Exception {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(1L);
 
         List<Salon> salons = salonService.searchSalonByCity(city);
 
@@ -89,11 +95,14 @@ public class SalonController {
 
     @GetMapping("/owner")
     public ResponseEntity<SalonDTO> getSalonByOwnerId(
-            @PathVariable Long salonId
+            @RequestHeader("Authorization") String jwt
     ) throws Exception {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(1L);
 
+        UserDTO userDTO = userFeignClient.getUserProfile(jwt).getBody();
+
+        if(userDTO == null) {
+            throw new Exception("User not found from jwt");
+        }
         Salon salon = salonService.getSalonByOwnerId(userDTO.getId());
 
         SalonDTO salonDTO = SalonMapper.mapToDto(salon);
@@ -113,4 +122,12 @@ public class SalonController {
         return ResponseEntity.ok(salonDTO);
     }
 
+
+    // delete salon by id
+    @DeleteMapping("/{salonId}")
+    public ResponseEntity<String> deleteSalon(
+            @PathVariable Long salonId) throws Exception {
+
+        return ResponseEntity.ok("Salon deleted successfully");
+    }
 }

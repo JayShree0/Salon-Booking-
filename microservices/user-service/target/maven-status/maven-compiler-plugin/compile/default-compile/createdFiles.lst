@@ -1,12 +1,5 @@
-com\jay\user_service\service\UserService.class
-com\jay\user_service\exception\UserNotFoundException.class
-com\jay\user_service\controller\UserController.class
-com\jay\user_service\dto\UserRequestDto.class
 com\jay\user_service\exception\ResourceAlreadyExistsException.class
 com\jay\user_service\exception\GlobalExceptionHandler.class
-com\jay\user_service\repository\UserRepository.class
-com\jay\user_service\service\imp\UserServiceImp.class
+com\jay\user_service\service\UserService.class
+com\jay\user_service\exception\UserNotFoundException.class
 com\jay\user_service\payload\response\ErrorResponse.class
-com\jay\user_service\model\User.class
-com\jay\user_service\dto\UserResponseDto.class
-com\jay\user_service\UserServiceApplication.class

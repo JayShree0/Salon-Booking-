@@ -1,9 +1,9 @@
-com\jay\category_service\CategoryServiceApplication.class
-com\jay\category_service\model\Category.class
 com\jay\category_service\dto\SalonDTO.class
 com\jay\category_service\service\CategoryService.class
-com\jay\category_service\controller\SalonCategoryController.class
-com\jay\category_service\service\impl\CategoryServiceImpl.class
 com\jay\category_service\controller\CategoryController.class
 com\jay\category_service\repository\CategoryRepository.class
+com\jay\category_service\CategoryServiceApplication.class
+com\jay\category_service\model\Category.class
+com\jay\category_service\controller\SalonCategoryController.class
+com\jay\category_service\service\impl\CategoryServiceImpl.class
 com\jay\category_service\dto\UserDTO.class

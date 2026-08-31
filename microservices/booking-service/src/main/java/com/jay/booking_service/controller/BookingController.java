@@ -1,11 +1,16 @@
 package com.jay.booking_service.controller;
 
 import com.jay.booking_service.domain.BookingStatus;
+import com.jay.booking_service.domain.PaymentMethod;
 import com.jay.booking_service.dto.*;
 import com.jay.booking_service.mapper.BookingMapper;
 import com.jay.booking_service.model.Booking;
 import com.jay.booking_service.model.SalonReport;
 import com.jay.booking_service.service.BookingService;
+import com.jay.booking_service.service.client.PaymentFeignClient;
+import com.jay.booking_service.service.client.SalonFeignClient;
+import com.jay.booking_service.service.client.ServiceOfferingFeignClient;
+import com.jay.booking_service.service.client.UserFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,45 +29,57 @@ public class BookingController {
 
 
     private final BookingService bookingService;
+    private final SalonFeignClient salonFeignClient;
+    private final UserFeignClient userFeignClient;
+    private final ServiceOfferingFeignClient serviceOfferingFeignClient;
+    private final PaymentFeignClient paymentFeignClient;
 
     @PostMapping
-    public ResponseEntity<Booking> createBooking(
+    public ResponseEntity<PaymentLinkResponse> createBooking(
             @RequestParam Long salonId,
-            @RequestBody BookingRequest bookingRequest
+            @RequestParam PaymentMethod paymentMethod,
+            @RequestBody BookingRequest bookingRequest,
+            @RequestHeader("Authorization") String jwt
     ) throws Exception {
-        UserDTO user = new UserDTO();
-        user.setId(1L); // Mocked user ID, replace with actual authentication logic
+        UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
 
-        SalonDTO salon = new SalonDTO();
-        salon.setId(salonId); // Mocked salon ID, replace with actual salon retrieval
-        salon.setOpenTime(LocalTime.now()); // Mocked open time, replace with actual salon open time
-        salon.setCloseTime(LocalTime.now().plusHours(12)); // Mocked close time
 
-        Set<ServiceDTO> serviceDTOSet = new HashSet<>();
+        SalonDTO salon = salonFeignClient.getSalonById(salonId).getBody();
 
-        ServiceDTO serviceDTO = new ServiceDTO();
-        serviceDTO.setId(1L); // Mocked service ID, replace with actual service
-        serviceDTO.setDuration(30); // Mocked duration, replace with actual service duration
-        serviceDTO.setPrice(50); // Mocked price, replace with actual service price
-        serviceDTO.setName("Hair cut for men"); // Mocked name, replace with actual service name
-        serviceDTOSet.add(serviceDTO);
+        Set<ServiceDTO> serviceDTOSet = serviceOfferingFeignClient.getServiceByIds(bookingRequest.getServiceIds()).getBody();
 
         Booking booking = bookingService.createBooking(bookingRequest, user, salon, serviceDTOSet);
-        return ResponseEntity.ok(booking);
+
+        BookingDTO bookingDTO = BookingMapper.toDTO(booking);
+
+        PaymentLinkResponse response = paymentFeignClient.createPaymentLink(
+                bookingDTO,
+                paymentMethod,
+                jwt
+        ).getBody();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/customer")
     public ResponseEntity<Set<BookingDTO>> getBookingsByCustomer(
-    ) {
-        List<Booking> bookings = bookingService.getBookingByCustomer(1L); // Mocked customer ID, replace with actual customer ID
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception {
 
+        UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
+        if (user == null || user.getId() == null) {
+            throw new Exception("user not found from jwt....");
+        }
+        List<Booking> bookings = bookingService.getBookingByCustomer(user.getId());
         return ResponseEntity.ok(getBookingDTOs(bookings));
     }
 
     @GetMapping("/salon")
     public ResponseEntity<Set<BookingDTO>> getBookingBySalon(
-    ) {
-        List<Booking> bookings = bookingService.getBookingsBySalon(1L); // Mocked salon ID, replace with actual salon ID
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception {
+
+        SalonDTO salonDTO = salonFeignClient.getSalonByOwnerId(jwt).getBody();
+        List<Booking> bookings = bookingService.getBookingsBySalon(salonDTO.getId()); // Mocked salon ID, replace with actual salon ID
 
         return ResponseEntity.ok(getBookingDTOs(bookings));
     }
@@ -108,7 +125,11 @@ public class BookingController {
 
     @GetMapping("/report")
     public ResponseEntity<SalonReport> getSalonReport(
+
+            @RequestHeader("Authorization") String jwt
     ) throws Exception {
+
+        SalonDTO salonDTO = salonFeignClient.getSalonByOwnerId(jwt).getBody();
         SalonReport report = bookingService.getSalonReport(1L); // Mocked salon ID, replace with actual salon ID
 
 

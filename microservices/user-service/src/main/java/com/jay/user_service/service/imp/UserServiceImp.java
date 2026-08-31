@@ -1,11 +1,13 @@
 package com.jay.user_service.service.imp;
 
-import com.jay.user_service.dto.UserRequestDto;
-import com.jay.user_service.dto.UserResponseDto;
+import com.jay.user_service.payload.dto.KeycloakUserDTO;
+import com.jay.user_service.payload.dto.UserRequestDto;
+import com.jay.user_service.payload.response.UserResponseDto;
 import com.jay.user_service.exception.ResourceAlreadyExistsException;
 import com.jay.user_service.exception.UserNotFoundException;
 import com.jay.user_service.model.User;
 import com.jay.user_service.repository.UserRepository;
+import com.jay.user_service.service.KeycloakService;
 import com.jay.user_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.List;
 public class UserServiceImp implements UserService {
 
     private final UserRepository userRepository;
+    private final KeycloakService keycloakService;
 
     @Override
     public UserResponseDto createUser(UserRequestDto requestDto) {
@@ -34,10 +37,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(this::mapToDto)
-                .toList();
+        return userRepository.findAll().stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -61,13 +61,15 @@ public class UserServiceImp implements UserService {
         userRepository.delete(getUser(id));
     }
 
-    private User getUser(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() ->
-                        new UserNotFoundException("User not found with id " + id)
-                );
+    @Override
+    public User getUserFromJwt(String jwt) throws Exception {
+        KeycloakUserDTO keycloakUserDTO = keycloakService.fetchUserProfileByJwt(jwt);
+        return userRepository.findByEmail(keycloakUserDTO.getEmail());
     }
 
+    private User getUser(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
+    }
 
     private void validateUser(UserRequestDto requestDto, User existingUser) {
 
@@ -86,8 +88,7 @@ public class UserServiceImp implements UserService {
         }
 
         // Phone check
-        if (requestDto.getPhone() != null &&
-                (existingUser == null || !requestDto.getPhone().equals(existingUser.getPhone()))) {
+        if (requestDto.getPhone() != null && (existingUser == null || !requestDto.getPhone().equals(existingUser.getPhone()))) {
 
             if (userRepository.existsByPhone(requestDto.getPhone())) {
                 throw new ResourceAlreadyExistsException("Phone already exists");
