@@ -11,8 +11,8 @@ import java.util.Set;
 @FeignClient("SERVICE-OFFERING")
 public interface ServiceOfferingFeignClient {
 
-    @GetMapping("/api/service-offering/list/{id}")
-    public ResponseEntity<Set<ServiceDTO>> getServiceByIds(
-            @PathVariable Set<Long> ids
+    @GetMapping("/api/service-offering/list/{ids}")
+    ResponseEntity<Set<ServiceDTO>> getServiceByIds(
+            @PathVariable("ids") Set<Long> ids
     ) throws Exception;
 }

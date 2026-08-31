@@ -36,8 +36,23 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${razorpay.api.secret}")
     private String razorpayApiSecret;
 
+    public void validateRazorpayConfiguration() {
+        boolean missingKey = razorpayApiKey == null || razorpayApiKey.isBlank() || razorpayApiKey.contains("your_");
+        boolean missingSecret = razorpayApiSecret == null || razorpayApiSecret.isBlank() || razorpayApiSecret.contains("your_");
+
+        if (missingKey || missingSecret) {
+            throw new IllegalStateException(
+                    "Razorpay authentication is not configured. Set RAZORPAY_KEY and RAZORPAY_SECRET environment variables or update payment-service application.yml."
+            );
+        }
+    }
+
     @Override
     public PaymentLinkResponse createOrder(UserDTO user, BookingDTO booking, PaymentMethod paymentMethod) throws Exception {
+
+        if (paymentMethod == PaymentMethod.RAZORPAY) {
+            validateRazorpayConfiguration();
+        }
 
         Long amount = (long) booking.getTotalPrice(); // Convert to paise for Razorpay
         PaymentOrder order = new PaymentOrder();
@@ -45,9 +60,11 @@ public class PaymentServiceImpl implements PaymentService {
         order.setPaymentMethod(paymentMethod);
         order.setBookingId(booking.getId());
         order.setSalonId(booking.getSalonId());
+
         order.setUserId(user.getId());
         PaymentOrder savedOrder = paymentOrderRepository.save(order);
 
+        System.out.println("saved order --------------- "+ savedOrder);
         PaymentLinkResponse paymentLinkResponse = new PaymentLinkResponse();
 
         if (paymentMethod.equals(PaymentMethod.RAZORPAY)) {
@@ -97,6 +114,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentLink createRazorpayPaymentLink(UserDTO user, Long amount, Long orderId)  throws Exception {
+
+        validateRazorpayConfiguration();
 
         Long amountInPaise = amount * 100; // Convert to paise
 
@@ -178,6 +197,7 @@ public class PaymentServiceImpl implements PaymentService {
                 Integer amountPaid = payment.get("amount");
                 String status = payment.get("status");
                 if(status.equals("captured")){
+                    // produce kafka event
                     paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
                     paymentOrderRepository.save(paymentOrder);
                     return true;

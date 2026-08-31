@@ -5,8 +5,12 @@ com\jay\payment_service\domain\PaymentMethod.class
 com\jay\payment_service\service\impl\PaymentServiceImpl.class
 com\jay\payment_service\PaymentServiceApplication.class
 com\jay\payment_service\controller\PaymentController.class
+com\jay\payment_service\service\client\UserFeignClient.class
 com\jay\payment_service\dto\ServiceDTO.class
 com\jay\payment_service\domain\PaymentOrderStatus.class
+com\jay\payment_service\service\client\ServiceOfferingFeignClient.class
+com\jay\payment_service\service\client\CategoryFeignClient.class
+com\jay\payment_service\service\client\SalonFeignClient.class
 com\jay\payment_service\dto\SalonDTO.class
 com\jay\payment_service\dto\BookingDTO.class
 com\jay\payment_service\dto\BookingRequest.class

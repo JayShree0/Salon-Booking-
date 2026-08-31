@@ -18,8 +18,8 @@ server:
 
 razorpay:
   api:
-    key: "your razorpay api key"
-    secret: "you razorpay api secret"
+    key: "rzp_test_TWVn435dZcoAEA"
+    secret: "XXEsLj20Q6XuRqOMn7stSkpy"
 
 stripe:
   api:

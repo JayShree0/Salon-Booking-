@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -21,5 +22,6 @@ public interface SalonRepository extends JpaRepository<Salon, Long> {
                     "lower(s.address) like lower(concat('%', :keyword, '%')))"
     )
     List<Salon> searchSalons(@Param("keyword") String keyword);
+
 
 }

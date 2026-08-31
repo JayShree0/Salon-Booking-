@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.jay.payment_service.service.impl.PaymentServiceImplTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.179 s -- in com.jay.payment_service.service.impl.PaymentServiceImplTest

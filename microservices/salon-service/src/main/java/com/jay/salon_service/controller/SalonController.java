@@ -112,7 +112,7 @@ public class SalonController {
 
 
     // get salon by id
-    // http://localhost:5502/api/salons/1
+    // http://localhost:5002/api/salons/1
     @GetMapping("/{salonId}")
     public ResponseEntity<SalonDTO> getSalonById(
             @PathVariable Long salonId) throws Exception
@@ -127,7 +127,7 @@ public class SalonController {
     @DeleteMapping("/{salonId}")
     public ResponseEntity<String> deleteSalon(
             @PathVariable Long salonId) throws Exception {
-
+        salonService.deleteSalon(salonId);
         return ResponseEntity.ok("Salon deleted successfully");
     }
 }

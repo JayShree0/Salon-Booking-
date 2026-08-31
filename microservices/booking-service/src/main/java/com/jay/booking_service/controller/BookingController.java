@@ -48,7 +48,15 @@ public class BookingController {
 
         Set<ServiceDTO> serviceDTOSet = serviceOfferingFeignClient.getServiceByIds(bookingRequest.getServiceIds()).getBody();
 
-        Booking booking = bookingService.createBooking(bookingRequest, user, salon, serviceDTOSet);
+        Booking booking = bookingService.createBooking(
+                bookingRequest,
+                user,
+                salon,
+                serviceDTOSet);
+
+        if(serviceDTOSet.isEmpty()) {
+            throw new Exception("service not found ...");
+        }
 
         BookingDTO bookingDTO = BookingMapper.toDTO(booking);
 
@@ -104,7 +112,7 @@ public class BookingController {
     }
 
     @GetMapping("/slots/salon/{salonId}/date/{date}")
-    public ResponseEntity<List<BookingSlotDTO>> getBookingByDate(
+    public ResponseEntity<List<BookingSlotDTO>> getBookedSlot( // getBookingByDate
             @PathVariable Long salonId,
             @RequestParam(required = false) LocalDate date
     ) throws Exception {
@@ -125,12 +133,11 @@ public class BookingController {
 
     @GetMapping("/report")
     public ResponseEntity<SalonReport> getSalonReport(
-
             @RequestHeader("Authorization") String jwt
     ) throws Exception {
 
         SalonDTO salonDTO = salonFeignClient.getSalonByOwnerId(jwt).getBody();
-        SalonReport report = bookingService.getSalonReport(1L); // Mocked salon ID, replace with actual salon ID
+        SalonReport report = bookingService.getSalonReport(salonDTO.getId()); // Mocked salon ID, replace with actual salon ID
 
 
         return ResponseEntity.ok(report);
