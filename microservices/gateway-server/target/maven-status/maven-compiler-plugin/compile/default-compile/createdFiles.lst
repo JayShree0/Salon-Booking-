@@ -1,0 +1,3 @@
+com\jay\gateway\server\config\KeycloakConverter.class
+com\jay\gateway\server\config\SecurityConfig.class
+com\jay\gateway\server\GatewayServerApplication.class

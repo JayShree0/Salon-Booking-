@@ -6,6 +6,7 @@ import com.jay.booking_service.dto.SalonDTO;
 import com.jay.booking_service.dto.ServiceDTO;
 import com.jay.booking_service.dto.UserDTO;
 import com.jay.booking_service.model.Booking;
+import com.jay.booking_service.model.PaymentOrder;
 import com.jay.booking_service.model.SalonReport;
 import com.jay.booking_service.repository.BookingRepository;
 import com.jay.booking_service.service.BookingService;
@@ -67,38 +68,73 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.save(newBooking);
     }
 
+//    public Boolean isTimeSlotAvailable(SalonDTO salonDTO,
+//                                       LocalDateTime bookingStartTime,
+//                                       LocalDateTime bookingEndTime) throws Exception {
+//
+//        // Whether your requested time falls within the salon's working hours
+//        LocalDateTime salonOpenTime = salonDTO.getOpenTime().atDate(bookingStartTime.toLocalDate());
+//        LocalDateTime salonCloseTime = salonDTO.getCloseTime().atDate(bookingStartTime.toLocalDate());
+//
+//        if (bookingStartTime.isBefore(salonOpenTime) ||
+//                bookingEndTime.isAfter(salonCloseTime)) {
+//
+//            throw new Exception("Requested time slot is outside salon working hours");
+//        }
+//
+//        // Whether your requested time overlaps with any existing bookings for the salon
+//        List<Booking> existingBookings = getBookingsBySalon(salonDTO.getId());
+//        for (Booking existingBooking : existingBookings) {
+//            LocalDateTime existingBookingStartTime = existingBooking.getStartTime();
+//            LocalDateTime existingBookingEndTime = existingBooking.getEndTime();
+//
+//            if (bookingStartTime.isBefore(existingBookingEndTime)
+//                    && bookingEndTime.isAfter(existingBookingStartTime)) {
+//                throw new Exception("Requested time slot overlaps with an existing booking");
+//            }
+//
+//            if (bookingStartTime.isEqual(existingBookingStartTime)
+//                    || bookingEndTime.isEqual(existingBookingEndTime)) {
+//                throw new Exception("Requested time slot overlaps with an existing booking");
+//            }
+//        }
+//        return true;
+//
+//    }
+
     public Boolean isTimeSlotAvailable(SalonDTO salonDTO,
                                        LocalDateTime bookingStartTime,
                                        LocalDateTime bookingEndTime) throws Exception {
 
-        // Whether your requested time falls within the salon's working hours
+        // 1. Verify working hours
         LocalDateTime salonOpenTime = salonDTO.getOpenTime().atDate(bookingStartTime.toLocalDate());
         LocalDateTime salonCloseTime = salonDTO.getCloseTime().atDate(bookingStartTime.toLocalDate());
 
-        if (bookingStartTime.isBefore(salonOpenTime) ||
-                bookingEndTime.isAfter(salonCloseTime)) {
-
+        if (bookingStartTime.isBefore(salonOpenTime) || bookingEndTime.isAfter(salonCloseTime)) {
             throw new Exception("Requested time slot is outside salon working hours");
         }
 
-        // Whether your requested time overlaps with any existing bookings for the salon
+        // 2. Check for overlaps with active bookings
         List<Booking> existingBookings = getBookingsBySalon(salonDTO.getId());
+
         for (Booking existingBooking : existingBookings) {
+            // Skip bookings that are cancelled or failed
+            if (existingBooking.getStatus() == BookingStatus.CANCELLED) {
+                continue;
+            }
+
             LocalDateTime existingBookingStartTime = existingBooking.getStartTime();
             LocalDateTime existingBookingEndTime = existingBooking.getEndTime();
 
+            // Standard interval overlap condition: (StartA < EndB) AND (EndA > StartB)
+            // This allows back-to-back bookings (e.g., one ends at 11:00 and the next starts at 11:00)
             if (bookingStartTime.isBefore(existingBookingEndTime)
                     && bookingEndTime.isAfter(existingBookingStartTime)) {
                 throw new Exception("Requested time slot overlaps with an existing booking");
             }
-
-            if (bookingStartTime.isEqual(existingBookingStartTime)
-                    || bookingEndTime.isEqual(existingBookingEndTime)) {
-                throw new Exception("Requested time slot overlaps with an existing booking");
-            }
         }
-        return true;
 
+        return true;
     }
 
     @Override
@@ -208,5 +244,14 @@ public class BookingServiceImpl implements BookingService {
         report.setTotalRefunds(totalRefunds);
 
         return report;
+    }
+
+    @Override
+    public Booking bookingSuccess(PaymentOrder paymentOrder) throws Exception{
+
+        Booking existingBooking = getBookingById(paymentOrder.getBookingId());
+
+        existingBooking.setStatus(BookingStatus.CONFIRMED);
+        return bookingRepository.save(existingBooking);
     }
 }

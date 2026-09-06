@@ -3,21 +3,37 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Annotation profile for payment-service" enabled="true">
+      <profile name="Annotation profile for user-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
+        </processorPath>
+        <module name="category-service" />
+        <module name="gateway-server" />
+        <module name="salon-service" />
+        <module name="user-service" />
+        <module name="eureka-server" />
+        <module name="service-offering" />
+      </profile>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="notification-service" />
+        <module name="review-service" />
+      </profile>
+      <profile name="Annotation profile for booking-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.32/lombok-1.18.32.jar" />
         </processorPath>
-        <module name="payment-service" />
-        <module name="category-service" />
         <module name="booking-service" />
-        <module name="gateway-server" />
-        <module name="salon-service" />
-        <module name="user-service" />
-        <module name="eureka-server" />
-        <module name="service-offering" />
+        <module name="payment-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -27,7 +43,9 @@
       <module name="category-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
       <module name="gateway-server" options="-parameters" />
+      <module name="notification-service" options="-parameters" />
       <module name="payment-service" options="-parameters" />
+      <module name="review-service" options="-parameters" />
       <module name="salon-service" options="-parameters" />
       <module name="service-offering" options="-parameters" />
       <module name="user-service" options="-parameters" />

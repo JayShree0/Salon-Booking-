@@ -6,6 +6,7 @@ import com.jay.booking_service.dto.SalonDTO;
 import com.jay.booking_service.dto.ServiceDTO;
 import com.jay.booking_service.dto.UserDTO;
 import com.jay.booking_service.model.Booking;
+import com.jay.booking_service.model.PaymentOrder;
 import com.jay.booking_service.model.SalonReport;
 
 import java.time.LocalDate;
@@ -37,5 +38,7 @@ public interface BookingService {
 
     // Get salon report (analytics)
     SalonReport getSalonReport(Long salonId);
+
+    Booking bookingSuccess(PaymentOrder paymentOrder) throws Exception;
 
 }

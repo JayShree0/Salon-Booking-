@@ -4,6 +4,8 @@ import com.jay.payment_service.domain.PaymentMethod;
 import com.jay.payment_service.domain.PaymentOrderStatus;
 import com.jay.payment_service.dto.BookingDTO;
 import com.jay.payment_service.dto.UserDTO;
+import com.jay.payment_service.messaging.BookingEventProducer;
+import com.jay.payment_service.messaging.NotificationEventProducer;
 import com.jay.payment_service.model.PaymentOrder;
 import com.jay.payment_service.repository.PaymentOrderRepository;
 import com.jay.payment_service.response.PaymentLinkResponse;
@@ -18,6 +20,7 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +29,10 @@ import org.springframework.stereotype.Service;
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentOrderRepository paymentOrderRepository;
+    private final BookingEventProducer bookingEventProducer;
+    private final NotificationEventProducer notificationEventProducer;
+
+
 
     @Value("${stripe.api.key}")
     private String stripeSecretKey;
@@ -196,8 +203,18 @@ public class PaymentServiceImpl implements PaymentService {
                 Payment payment = razorpay.payments.fetch(paymentId);
                 Integer amountPaid = payment.get("amount");
                 String status = payment.get("status");
+
                 if(status.equals("captured")){
                     // produce kafka event
+                    // produce the event for rabbitmq based on the payment method
+                    bookingEventProducer.sendBookingUpdatedEvent(paymentOrder);
+
+                    notificationEventProducer.sentNotification(
+                            paymentOrder.getBookingId(),
+                            paymentOrder.getUserId(),
+                            paymentOrder.getSalonId()
+                    );
+
                     paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
                     paymentOrderRepository.save(paymentOrder);
                     return true;

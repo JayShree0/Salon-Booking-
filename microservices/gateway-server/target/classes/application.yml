@@ -24,6 +24,11 @@ spring:
           predicates:
             - Path=/api/categories/**
 
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notifications/**,/api/notifications/user/**
+
         - id: salon-service
           uri: lb://SALON-SERVICE
           predicates:
