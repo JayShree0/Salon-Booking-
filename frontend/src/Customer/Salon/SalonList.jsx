@@ -6,7 +6,7 @@ const SalonList = () => {
 
     <div className='flex gap-5 flex-wrap'>
       {
-        [1,1,1].map((item) => <SalonCard/>)
+        [1, 1, 1].map((item, index) => <SalonCard key={index} />)
       }
     </div>
   )

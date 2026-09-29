@@ -8,7 +8,8 @@ const Banner = () => {
         muted
         autoPlay
         autoFocus
-        src="https://booksy-public.s3.amazonaws.com/horizontal_.webm"
+        // src="https://booksy-public.s3.amazonaws.com/horizontal_.webm"
+        src="/src/Assets/horizontal_.webm"
       />
 
       <div className="textPart absolute flex flex-col items-center justify-center inset-0 text-white z-20 space-y-3 px-5">

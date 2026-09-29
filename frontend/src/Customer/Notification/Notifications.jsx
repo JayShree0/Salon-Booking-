@@ -1,7 +1,7 @@
 import React from 'react'
 import NotificationCard from './NotificationCard';
 
-const Notification = () => {
+const Notifications = () => {
   return (
     <div className="px-5 md:flex flex-col items-center mt-10 min-h-screen">
       <div>
@@ -16,4 +16,4 @@ const Notification = () => {
   )
 }
 
-export default Notification
+export default Notifications
