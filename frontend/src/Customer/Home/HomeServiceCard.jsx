@@ -14,7 +14,7 @@ const HomeServiceCard = ({ item }) => {
   return (
     <div
       onClick={handleClick}
-      className="group relative cursor-pointer overflow-hidden rounded-3xl bg-slate-950 shadow-md hover:shadow-2xl hover:shadow-amber-500/15 transition-all duration-300 hover:-translate-y-1.5 border border-slate-200/70 flex flex-col justify-end w-full aspect-[3/4]"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-950 shadow-md hover:shadow-2xl hover:shadow-amber-500/15 transition-all duration-300 hover:-translate-y-1.5 border border-slate-200/70 flex flex-col justify-end w-full aspect-[3/4] min-w-0"
     >
       {/* High-Quality Portrait Photo with object-fit: cover */}
       <img
@@ -23,7 +23,7 @@ const HomeServiceCard = ({ item }) => {
         onError={(e) => {
           e.currentTarget.src = FALLBACK_IMAGE;
         }}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
         loading="lazy"
       />
 
@@ -31,16 +31,16 @@ const HomeServiceCard = ({ item }) => {
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent transition-opacity duration-300 pointer-events-none" />
 
       {/* Subtle Amber Glow Border on Hover */}
-      <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-amber-400/50 transition-colors duration-300 pointer-events-none" />
+      <div className="absolute inset-0 rounded-2xl sm:rounded-3xl border-2 border-transparent group-hover:border-amber-400/50 transition-colors duration-300 pointer-events-none" />
 
-      {/* Bottom Content: Category Title, Subtitle, and Gold Circular Button as in Design */}
-      <div className="relative z-10 p-4 sm:p-5 text-white text-left space-y-1">
+      {/* Bottom Content: Category Title, Subtitle, and Gold Circular Button */}
+      <div className="relative z-10 p-3 sm:p-4 lg:p-5 text-white text-left space-y-1 min-w-0">
         <h3 className="font-extrabold text-base sm:text-lg tracking-tight leading-snug text-white group-hover:text-amber-300 transition-colors duration-200 line-clamp-1 drop-shadow-xs">
           {item.name}
         </h3>
 
-        <div className="flex items-center justify-between text-slate-200 group-hover:text-amber-200 transition-colors pt-0.5">
-          <span className="text-xs sm:text-sm font-medium text-slate-200/90 leading-none">
+        <div className="flex items-center justify-between gap-2 min-w-0 text-slate-200 group-hover:text-amber-200 transition-colors pt-0.5">
+          <span className="text-xs sm:text-sm font-medium text-slate-200/90 leading-none truncate">
             Book Treatment
           </span>
           <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#B48C54] hover:bg-amber-600 text-white flex items-center justify-center shadow-md transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:scale-105 shrink-0">

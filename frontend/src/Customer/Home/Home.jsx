@@ -48,8 +48,8 @@ const Home = () => {
             </button>
           </div>
 
-          {/* 5 in Line 1, 3 in Line 2 (Starting from Start / Left-Aligned) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
+          {/* Fluid Responsive Grid: 2 cols on mobile, 3 on small tablet, 4 on tablet, 5 on desktop/laptop */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5 min-w-0">
             {services.map((item) => (
               <HomeServiceCard key={item.id} item={item} />
             ))}
