@@ -1,7 +1,6 @@
 import React from "react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import Footer from "../../components/common/Footer";
 
 const About = () => {
   const navigate = useNavigate();
@@ -81,8 +80,6 @@ const About = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

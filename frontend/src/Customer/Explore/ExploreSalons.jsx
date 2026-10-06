@@ -7,7 +7,6 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import SalonCard from "../Salon/SalonCard";
 import { SalonCardSkeleton } from "../../components/common/SkeletonCard";
 import EmptyState from "../../components/common/EmptyState";
-import Footer from "../../components/common/Footer";
 import { fetchSalons } from "../../Redux/Salon/action";
 import { services } from "../../Data/services";
 
@@ -208,8 +207,6 @@ const ExploreSalons = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };
