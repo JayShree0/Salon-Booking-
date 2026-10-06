@@ -99,6 +99,7 @@ const Bookings = () => {
         {!loading && !error && bookings.map((booking) => (
           <BookingCard key={booking.id} booking={booking} onCancel={cancelBooking} />
         ))}
+
       </div>
     </div>
   );
