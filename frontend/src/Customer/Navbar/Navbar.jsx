@@ -292,6 +292,22 @@ const Navbar = () => {
                     My Appointments
                   </MenuItem>
 
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose();
+                      navigate("/notifications");
+                    }}
+                    sx={{ borderRadius: 2, fontSize: "0.85rem", py: 1 }}
+                  >
+                    <NotificationsOutlinedIcon fontSize="small" className="text-slate-500 mr-2.5" />
+                    <span className="flex-1">Notifications</span>
+                    {unreadCount > 0 && (
+                      <span className="ml-2 text-[10px] font-extrabold bg-amber-500 text-slate-950 px-1.5 py-0.2 rounded-full leading-none">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </MenuItem>
+
                   {user.role === "SALON_OWNER" && (
                     <MenuItem
                       onClick={() => {
@@ -430,6 +446,11 @@ const Navbar = () => {
               ...(user
                 ? [
                     { label: "My Bookings", path: "/bookings", icon: <CalendarMonthOutlinedIcon fontSize="small" /> },
+                    {
+                      label: unreadCount > 0 ? `Notifications (${unreadCount})` : "Notifications",
+                      path: "/notifications",
+                      icon: <NotificationsOutlinedIcon fontSize="small" />,
+                    },
                     { label: "My Profile", path: "/profile", icon: <PersonOutlinedIcon fontSize="small" /> },
                   ]
                 : []),
