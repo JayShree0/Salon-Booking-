@@ -24,22 +24,32 @@ const Home = () => {
 
       {/* Main Content Sections with Responsive Width */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 md:space-y-28">
-        {/* 2. Popular Services & Treatments Category Showcase */}
-        <section className="space-y-8">
-          <div className="space-y-2 text-left">
-            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest font-extrabold text-amber-700 bg-amber-50 px-3.5 py-1.5 rounded-full border border-amber-200/80 shadow-2xs">
-              SIGNATURE EXPERIENCES
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Explore by Category & Treatment
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-              From precision fades to rejuvenating therapies, select your desired service to discover verified artists.
-            </p>
+        {/* 2. Popular Services & Treatments Category Showcase (Compact 2x4 Grid) */}
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div className="space-y-1.5 text-left">
+              <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-amber-700 bg-amber-50/90 px-3 py-1 rounded-full border border-amber-300/80 shadow-2xs">
+                SIGNATURE EXPERIENCES
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Explore by Category & Treatment
+              </h2>
+              <p className="text-slate-500 text-xs sm:text-sm max-w-xl font-normal leading-relaxed">
+                From precision haircuts to restorative body treatments, select your desired ritual to browse top-rated local artists.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/explore")}
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer group shrink-0 self-start sm:self-end"
+            >
+              <span>View All Categories</span>
+              <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+            </button>
           </div>
 
-          {/* Grid Layout: 5 items per row on desktop (2 rows of 5), 4 on md, 3 on sm, 2 on mobile */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          {/* Compact 2x4 Grid: 4 items per row on desktop & tablet (2 rows of 4), 2 on mobile */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3.5 sm:gap-4 md:gap-5">
             {services.map((item) => (
               <HomeServiceCard key={item.id} item={item} />
             ))}
