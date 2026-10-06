@@ -26,15 +26,25 @@ const SalonServiceDetails = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       api.get(`/api/salons/${salonId}`),
       api.get(`/api/categories/salon/${salonId}`),
       api.get(`/api/service-offering/salon/${salonId}`),
     ])
-      .then(([salonResponse, categoryResponse, serviceResponse]) => {
-        setSalon(salonResponse.data);
-        setCategories(categoryResponse.data || []);
-        setServices(serviceResponse.data || []);
+      .then(([salonRes, categoryRes, serviceRes]) => {
+        if (salonRes.status === "fulfilled") {
+          setSalon(salonRes.value.data);
+        } else {
+          setError(salonRes.reason?.response?.data?.message || salonRes.reason?.message);
+        }
+
+        if (categoryRes.status === "fulfilled") {
+          setCategories(categoryRes.value.data || []);
+        }
+
+        if (serviceRes.status === "fulfilled") {
+          setServices(serviceRes.value.data || []);
+        }
       })
       .catch((requestError) => setError(requestError.response?.data?.message || requestError.message))
       .finally(() => setLoading(false));
@@ -119,15 +129,47 @@ const SalonServiceDetails = () => {
   if (error && !salon) return <p role="alert" className="py-8 text-red-700">Unable to load services: {error}</p>;
 
   return (
-    <div className="lg:flex gap-5 h-[90vh] mt-10">
-      <section className="space-y-5 border-r lg:w-[25%] pr-5">
-        <CategoryCard category={{ id: "all", name: "All services" }} selected={selectedCategory === "all"} onClick={() => setSelectedCategory("all")} />
-        {categories.map((category) => <CategoryCard key={category.id} category={category} selected={selectedCategory === category.id} onClick={() => setSelectedCategory(category.id)} />)}
+    <div id="salon-categories-section" className="lg:flex gap-5 min-h-[70vh] mt-6 scroll-mt-24">
+      {/* Categories Sidebar */}
+      <section className="space-y-4 border-r lg:w-[25%] pr-5">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <h3 className="font-bold text-sm text-slate-800">Salon Categories</h3>
+          <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+            {categories.length > 0 ? `${categories.length} Categories` : "All"}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <CategoryCard
+            category={{ id: "all", name: "All services" }}
+            selected={selectedCategory === "all"}
+            onClick={() => setSelectedCategory("all")}
+          />
+          {categories.map((category) => (
+            <CategoryCard
+              key={category.id}
+              category={category}
+              selected={selectedCategory === category.id}
+              onClick={() => setSelectedCategory(category.id)}
+            />
+          ))}
+        </div>
       </section>
 
-      <section className="space-y-2 lg:w-[50%] px-5 lg:px-20 overflow-y-auto">
+      {/* Services List for Selected Category */}
+      <section className="space-y-2 lg:w-[50%] px-5 lg:px-12 overflow-y-auto">
         {error && <p role="alert" className="text-red-700">{error}</p>}
-        {filteredServices.length === 0 && <p className="py-8 text-gray-600">No services are available in this category.</p>}
+        {filteredServices.length === 0 && (
+          <div className="py-12 text-center text-gray-500">
+            <p className="font-medium">No services are currently listed in this category.</p>
+            <button
+              onClick={() => setSelectedCategory("all")}
+              className="mt-2 text-xs font-bold text-amber-600 hover:underline cursor-pointer"
+            >
+              View All Services
+            </button>
+          </div>
+        )}
         {filteredServices.map((service) => (
           <div key={service.id} className="space-y-4">
             <ServiceCard service={service} selected={selectedServices.includes(service.id)} onToggle={() => toggleService(service.id)} />
@@ -136,19 +178,17 @@ const SalonServiceDetails = () => {
         ))}
       </section>
 
+      {/* Booking Drawer */}
       <section className="lg:w-[25%]">
         <div>
             <div className="flex items-center gap-2">
               <ShoppingCart
                 sx={{
                   fontSize: "30px",
-                  color: "green",
+                  color: "#D97706",
                 }}
               />
-              <h1 className="font-thin text-sm">Selected Services</h1>
-                
-               
-            
+              <h1 className="font-semibold text-sm text-slate-800">Selected Services</h1>
             </div>
             <SelectedServiceList services={chosenServices} onRemove={toggleService} />
             <p className="flex justify-between py-2 font-semibold"><span>Total ({totalDuration} mins)</span><span>₹{totalPrice}</span></p>

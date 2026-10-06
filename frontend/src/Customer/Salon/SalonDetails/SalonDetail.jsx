@@ -19,12 +19,20 @@ const SalonDetail = () => {
   const images = salon.images?.filter(Boolean) || [];
   const fallbackImage = "https://images.pexels.com/photos/3998415/pexels-photo-3998415.jpeg?auto=compress&cs=tinysrgb&w=900";
 
+  const handleScrollToCategories = () => {
+    const el = document.getElementById("salon-categories-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="space-y-5 mb-20">
+    <div className="space-y-6 mb-12">
+      {/* Photo Gallery Grid */}
       <section className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
           <img
-            className="w-full rounded-md h-[15rem] object-cover"
+            className="w-full rounded-2xl h-[16rem] sm:h-[20rem] object-cover shadow-sm"
             src={images[0] || fallbackImage}
             alt={`${salon.name} salon`}
           />
@@ -32,7 +40,7 @@ const SalonDetail = () => {
 
         <div className="col-span-1 hidden sm:block">
           <img
-            className="w-full rounded-md h-[15rem] object-cover"
+            className="w-full rounded-2xl h-[12rem] object-cover shadow-xs"
             src={images[1] || images[0] || fallbackImage}
             alt={`${salon.name} salon interior`}
           />
@@ -40,17 +48,29 @@ const SalonDetail = () => {
 
         <div className="col-span-1 hidden sm:block">
           <img
-            className="w-full rounded-md h-[15rem] object-cover"
+            className="w-full rounded-2xl h-[12rem] object-cover shadow-xs"
             src={images[2] || images[0] || fallbackImage}
             alt={`${salon.name} salon workspace`}
           />
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h1 className="font-bold text-3xl">{salon.name}</h1>
-        <p>{[salon.address, salon.city].filter(Boolean).join(", ")}</p>
-        <p>Hours: {String(salon.openTime || "").slice(0, 5)} to {String(salon.closeTime || "").slice(0, 5)}</p>
+      {/* Salon Info Header with Quick "View All Categories" Action */}
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-slate-50/70 border border-slate-200/80 rounded-2xl">
+        <div className="space-y-1 text-left">
+          <h1 className="font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">{salon.name}</h1>
+          <p className="text-slate-600 text-sm font-medium">{[salon.address, salon.city].filter(Boolean).join(", ")}</p>
+          <p className="text-slate-500 text-xs">Hours: {String(salon.openTime || "09:00").slice(0, 5)} to {String(salon.closeTime || "18:00").slice(0, 5)}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleScrollToCategories}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs sm:text-sm font-bold shadow-md shadow-amber-600/20 active:scale-95 transition-all duration-200 cursor-pointer shrink-0 self-start sm:self-center"
+        >
+          <span>View All Categories</span>
+          <span>↓</span>
+        </button>
       </section>
     </div>
   );
