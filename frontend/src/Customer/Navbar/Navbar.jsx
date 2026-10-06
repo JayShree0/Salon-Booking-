@@ -244,97 +244,203 @@ const Navbar = () => {
                   anchorEl={anchorEl}
                   open={isMenuOpen}
                   onClose={handleMenuClose}
+                  elevation={0}
                   PaperProps={{
                     sx: {
                       mt: 1.5,
-                      borderRadius: 3,
-                      minWidth: 230,
-                      boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
-                      border: "1px solid rgba(226,232,240,0.8)",
-                      p: 1,
+                      width: 260,
+                      borderRadius: "18px",
+                      boxShadow: "0 12px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.05)",
+                      border: "1px solid rgba(226, 232, 240, 0.9)",
+                      p: 1.25,
+                      overflow: "visible",
+                    },
+                  }}
+                  MenuListProps={{
+                    sx: {
+                      p: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "2px",
                     },
                   }}
                   transformOrigin={{ horizontal: "right", vertical: "top" }}
                   anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
                   {/* User Profile Card Header */}
-                  <div className="px-3 py-2 space-y-1">
+                  <div className="px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-100 mb-1 space-y-1">
                     <p className="font-bold text-sm text-slate-900 truncate leading-snug">
                       {user.fullName || user.username}
                     </p>
-                    <p className="text-xs text-slate-400 truncate leading-none">{user.email}</p>
-                    <span className="inline-block mt-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                      {user.role === "SALON_OWNER" ? "Salon Partner" : "Client"}
-                    </span>
+                    <p className="text-xs text-slate-500 truncate leading-none">{user.email}</p>
+                    <div className="pt-0.5">
+                      <span className="inline-block text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        {user.role === "SALON_OWNER" ? "Salon Partner" : "Client"}
+                      </span>
+                    </div>
                   </div>
 
-                  <Divider sx={{ my: 1 }} />
+                  <Divider sx={{ my: 0.75, borderColor: "rgba(241, 245, 249, 0.9)" }} />
 
+                  {/* 1. My Profile */}
                   <MenuItem
                     onClick={() => {
                       handleMenuClose();
                       navigate("/profile");
                     }}
-                    sx={{ borderRadius: 2, fontSize: "0.85rem", py: 1 }}
+                    sx={{
+                      borderRadius: "10px",
+                      px: 2,
+                      py: 1.25,
+                      minHeight: 42,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: "#1e293b",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        bgcolor: "#f8fafc",
+                        color: "#d97706",
+                        "& .menu-icon": { color: "#d97706" },
+                      },
+                    }}
                   >
-                    <PersonOutlinedIcon fontSize="small" className="text-slate-500 mr-2.5" />
-                    My Profile
+                    <span className="w-5 h-5 flex items-center justify-center shrink-0 text-slate-500 menu-icon transition-colors">
+                      <PersonOutlinedIcon sx={{ fontSize: 19 }} />
+                    </span>
+                    <span className="leading-none">My Profile</span>
                   </MenuItem>
 
+                  {/* 2. My Appointments */}
                   <MenuItem
                     onClick={() => {
                       handleMenuClose();
                       navigate("/bookings");
                     }}
-                    sx={{ borderRadius: 2, fontSize: "0.85rem", py: 1 }}
+                    sx={{
+                      borderRadius: "10px",
+                      px: 2,
+                      py: 1.25,
+                      minHeight: 42,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: "#1e293b",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        bgcolor: "#f8fafc",
+                        color: "#d97706",
+                        "& .menu-icon": { color: "#d97706" },
+                      },
+                    }}
                   >
-                    <CalendarMonthOutlinedIcon fontSize="small" className="text-slate-500 mr-2.5" />
-                    My Appointments
+                    <span className="w-5 h-5 flex items-center justify-center shrink-0 text-slate-500 menu-icon transition-colors">
+                      <CalendarMonthOutlinedIcon sx={{ fontSize: 19 }} />
+                    </span>
+                    <span className="leading-none">My Appointments</span>
                   </MenuItem>
 
+                  {/* 3. Notifications */}
                   <MenuItem
                     onClick={() => {
                       handleMenuClose();
                       navigate("/notifications");
                     }}
-                    sx={{ borderRadius: 2, fontSize: "0.85rem", py: 1 }}
+                    sx={{
+                      borderRadius: "10px",
+                      px: 2,
+                      py: 1.25,
+                      minHeight: 42,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: "#1e293b",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        bgcolor: "#f8fafc",
+                        color: "#d97706",
+                        "& .menu-icon": { color: "#d97706" },
+                      },
+                    }}
                   >
-                    <NotificationsOutlinedIcon fontSize="small" className="text-slate-500 mr-2.5" />
-                    <span className="flex-1">Notifications</span>
+                    <span className="w-5 h-5 flex items-center justify-center shrink-0 text-slate-500 menu-icon transition-colors">
+                      <NotificationsOutlinedIcon sx={{ fontSize: 19 }} />
+                    </span>
+                    <span className="leading-none flex-1">Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="ml-2 text-[10px] font-extrabold bg-amber-500 text-slate-950 px-1.5 py-0.2 rounded-full leading-none">
+                      <span className="text-[10px] font-extrabold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
                         {unreadCount}
                       </span>
                     )}
                   </MenuItem>
 
+                  {/* 4. Role-based: Salon Dashboard */}
                   {user.role === "SALON_OWNER" && (
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
                         navigate("/salon-dashboard");
                       }}
-                      sx={{ borderRadius: 2, fontSize: "0.85rem", py: 1 }}
+                      sx={{
+                        borderRadius: "10px",
+                        px: 2,
+                        py: 1.25,
+                        minHeight: 42,
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                        color: "#1e293b",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        transition: "all 0.15s ease",
+                        "&:hover": {
+                          bgcolor: "#f8fafc",
+                          color: "#d97706",
+                          "& .menu-icon": { color: "#d97706" },
+                        },
+                      }}
                     >
-                      <DashboardOutlinedIcon fontSize="small" className="text-slate-500 mr-2.5" />
-                      Salon Dashboard
+                      <span className="w-5 h-5 flex items-center justify-center shrink-0 text-slate-500 menu-icon transition-colors">
+                        <DashboardOutlinedIcon sx={{ fontSize: 19 }} />
+                      </span>
+                      <span className="leading-none">Salon Dashboard</span>
                     </MenuItem>
                   )}
 
-                  <Divider sx={{ my: 1 }} />
+                  <Divider sx={{ my: 0.75, borderColor: "rgba(241, 245, 249, 0.9)" }} />
 
+                  {/* 5. Sign Out */}
                   <MenuItem
                     onClick={handleSignOut}
                     sx={{
-                      borderRadius: 2,
-                      fontSize: "0.85rem",
-                      py: 1,
-                      color: "#DC2626",
-                      "&:hover": { bgcolor: "#FEF2F2" },
+                      borderRadius: "10px",
+                      px: 2,
+                      py: 1.25,
+                      minHeight: 42,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: "#dc2626",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        bgcolor: "#fef2f2",
+                        color: "#b91c1c",
+                        "& .menu-icon": { color: "#b91c1c" },
+                      },
                     }}
                   >
-                    <LogoutOutlinedIcon fontSize="small" className="text-red-500 mr-2.5" />
-                    Sign Out
+                    <span className="w-5 h-5 flex items-center justify-center shrink-0 text-red-500 menu-icon transition-colors">
+                      <LogoutOutlinedIcon sx={{ fontSize: 19 }} />
+                    </span>
+                    <span className="leading-none">Sign Out</span>
                   </MenuItem>
                 </Menu>
               </div>
