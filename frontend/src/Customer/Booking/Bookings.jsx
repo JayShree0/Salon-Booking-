@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import BookingCard from "./BookingCard";
+import { useNavigate } from "react-router-dom";
+import BookingCard, { BookingCardSkeleton } from "./BookingCard";
+import EmptyState from "../../components/common/EmptyState";
 import api from "../../config/api";
 
 const Bookings = () => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -51,16 +54,51 @@ const Bookings = () => {
   };
 
   return (
-    <div className="px-5 md:flex flex-col items-center mt-10 min-h-screen">
-      <div>
-        <h1 className="text-3xl font-bold py-5">My Bookings</h1>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 min-h-[75vh]">
+      {/* Header section with badge matching website aesthetic */}
+      <div className="mb-6 sm:mb-8 text-left space-y-1.5">
+        <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-amber-700 bg-amber-50/90 px-3 py-1 rounded-full border border-amber-300/80 shadow-2xs">
+          APPOINTMENTS & HISTORY
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          My Bookings
+        </h1>
+        <p className="text-slate-500 text-xs sm:text-sm">
+          Track upcoming appointments, view service summaries, and manage salon visits.
+        </p>
       </div>
 
-      <div className="space-y-4 md:w-[35rem]">
-        {loading && <p>Loading bookings...</p>}
-        {error && <p role="alert" className="text-red-700">{error}</p>}
-        {!loading && !error && bookings.length === 0 && <p>You do not have any bookings yet.</p>}
-        {bookings.map((booking) => <BookingCard key={booking.id} booking={booking} onCancel={cancelBooking} />)}
+      <div className="space-y-4 sm:space-y-5">
+        {/* Loading Skeletons */}
+        {loading && (
+          <div className="space-y-4">
+            <BookingCardSkeleton />
+            <BookingCardSkeleton />
+          </div>
+        )}
+
+        {/* Error Alert Banner */}
+        {error && (
+          <div role="alert" className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-medium">
+            {error}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && bookings.length === 0 && (
+          <EmptyState
+            icon="📅"
+            title="No Bookings Found"
+            description="You don't have any appointments booked yet. Explore our premier salons and schedule your next treatment!"
+            actionText="Explore Salons"
+            onAction={() => navigate("/explore")}
+          />
+        )}
+
+        {/* Bookings List */}
+        {!loading && !error && bookings.map((booking) => (
+          <BookingCard key={booking.id} booking={booking} onCancel={cancelBooking} />
+        ))}
       </div>
     </div>
   );
