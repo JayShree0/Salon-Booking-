@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Badge,
-  Button,
   Drawer,
   IconButton,
   Menu,
@@ -117,42 +116,42 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/90 border-b border-slate-200/80 shadow-xs transition-all duration-300">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/95 border-b border-slate-200/80 shadow-xs transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Brand Logo */}
+          {/* Left: Brand Logo & Wordmark */}
           <div
             onClick={() => navigate("/")}
-            className="flex items-center gap-3 cursor-pointer group select-none"
+            className="flex items-center gap-3 cursor-pointer group select-none shrink-0"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-500/25 group-hover:scale-105 group-hover:shadow-amber-500/40 transition-all duration-300">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-500/25 group-hover:scale-105 group-hover:shadow-amber-500/40 transition-all duration-300 shrink-0">
               <ContentCutIcon sx={{ fontSize: 20 }} className="transform -rotate-45" />
             </div>
 
-            <div className="flex flex-col">
+            <div className="flex flex-col justify-center">
               <span className="font-extrabold text-xl text-slate-900 tracking-tight leading-none group-hover:text-amber-600 transition-colors">
                 SALONBOOK<span className="text-amber-500">.</span>
               </span>
-              <span className="text-[9px] font-extrabold text-amber-600 uppercase tracking-widest leading-tight mt-0.5">
+              <span className="text-[9px] font-extrabold text-amber-600 uppercase tracking-widest leading-none mt-1">
                 Luxury Care
               </span>
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+          {/* Center: Desktop Navigation Links with Perfect Vertical & Horizontal Alignment */}
+          <nav className="hidden md:flex items-center justify-center gap-1 lg:gap-2">
             {[
               { label: "Home", path: "/" },
               { label: "Explore Salons", path: "/explore" },
-              { label: "About", path: "/about" },
+              { label: "About Us", path: "/about" },
               ...(user ? [{ label: "My Bookings", path: "/bookings" }] : []),
             ].map((item) => (
               <button
                 key={item.path}
                 type="button"
                 onClick={() => navigate(item.path)}
-                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                className={`inline-flex items-center justify-center px-4 py-2 rounded-full text-xs lg:text-sm font-semibold tracking-wide transition-all duration-200 cursor-pointer h-9 leading-none ${
                   isActive(item.path)
-                    ? "bg-amber-50 text-amber-700 shadow-xs"
+                    ? "bg-amber-50 text-amber-700 font-bold shadow-xs border border-amber-200/60"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                 }`}
               >
@@ -161,32 +160,36 @@ const Navbar = () => {
             ))}
           </nav>
 
-          {/* Right Action Tray */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Salon Owner or Partner Action */}
+          {/* Right: Action Tray (Unified 40px Height Axis for Flawless Alignment) */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Salon Owner Dashboard or Partner CTA */}
             {user?.role === "SALON_OWNER" ? (
               <button
+                type="button"
                 onClick={() => navigate("/salon-dashboard")}
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="hidden sm:inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm active:scale-95 cursor-pointer leading-none"
               >
-                <DashboardOutlinedIcon sx={{ fontSize: 16 }} />
+                <DashboardOutlinedIcon sx={{ fontSize: 16 }} className="text-amber-400" />
                 <span>Salon Dashboard</span>
               </button>
             ) : (
               <button
+                type="button"
                 onClick={() => openAuth("signup", "SALON_OWNER")}
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-amber-600/40 text-amber-700 hover:border-amber-600 hover:bg-amber-50 font-semibold text-xs transition-all cursor-pointer"
+                className="hidden sm:inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full border border-amber-600/40 text-amber-700 hover:border-amber-600 hover:bg-amber-50 font-bold text-xs transition-all cursor-pointer leading-none"
               >
-                <StorefrontOutlinedIcon sx={{ fontSize: 16 }} />
+                <StorefrontOutlinedIcon sx={{ fontSize: 16 }} className="text-amber-600" />
                 <span>List Your Salon</span>
               </button>
             )}
 
-            {/* Notification Bell */}
+            {/* Notification Bell (Exact 40px Box) */}
             <IconButton
               onClick={() => (user ? navigate("/notifications") : openAuth("login"))}
               aria-label="Notifications"
               sx={{
+                width: 40,
+                height: 40,
                 color: "#475569",
                 "&:hover": { color: "#D97706", bgcolor: "#FEF3C7" },
               }}
@@ -199,36 +202,41 @@ const Navbar = () => {
                     bgcolor: "#D97706",
                     color: "white",
                     fontWeight: 700,
+                    fontSize: "0.65rem",
+                    height: 18,
+                    minWidth: 18,
                   },
                 }}
               >
-                <NotificationsOutlinedIcon />
+                <NotificationsOutlinedIcon sx={{ fontSize: 21 }} />
               </Badge>
             </IconButton>
 
-            {/* Authenticated User Menu or Sign In */}
+            {/* Authenticated User Menu Trigger OR Sign In Button */}
             {user ? (
               <div className="flex items-center">
                 <button
                   type="button"
                   onClick={handleMenuClick}
-                  className="inline-flex items-center gap-2 p-1 pl-2 sm:pr-2.5 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 h-10 pl-1.5 pr-3 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/90 hover:border-amber-400/50 transition-all cursor-pointer shadow-2xs"
                 >
                   <Avatar
                     sx={{
-                      width: 32,
-                      height: 32,
+                      width: 28,
+                      height: 28,
                       bgcolor: "#D97706",
-                      fontSize: "0.85rem",
+                      fontSize: "0.8rem",
                       fontWeight: 700,
-                      boxShadow: "0 2px 6px rgba(217,119,6,0.3)",
+                      boxShadow: "0 2px 4px rgba(217,119,6,0.25)",
                     }}
                   >
                     {(user.fullName || user.username || "U").slice(0, 1).toUpperCase()}
                   </Avatar>
-                  <span className="hidden sm:block text-xs font-bold text-slate-800 max-w-[100px] truncate text-left">
+
+                  <span className="hidden sm:inline-block text-xs font-bold text-slate-800 max-w-[110px] truncate leading-none">
                     {user.fullName || user.username}
                   </span>
+
                   <KeyboardArrowDownIcon sx={{ fontSize: 16 }} className="text-slate-400" />
                 </button>
 
@@ -240,7 +248,7 @@ const Navbar = () => {
                     sx: {
                       mt: 1.5,
                       borderRadius: 3,
-                      minWidth: 220,
+                      minWidth: 230,
                       boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
                       border: "1px solid rgba(226,232,240,0.8)",
                       p: 1,
@@ -249,12 +257,12 @@ const Navbar = () => {
                   transformOrigin={{ horizontal: "right", vertical: "top" }}
                   anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
-                  {/* User Profile Card Header in Dropdown */}
-                  <div className="px-3 py-2 space-y-0.5">
-                    <p className="font-bold text-sm text-slate-900 truncate">
+                  {/* User Profile Card Header */}
+                  <div className="px-3 py-2 space-y-1">
+                    <p className="font-bold text-sm text-slate-900 truncate leading-snug">
                       {user.fullName || user.username}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                    <p className="text-xs text-slate-400 truncate leading-none">{user.email}</p>
                     <span className="inline-block mt-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                       {user.role === "SALON_OWNER" ? "Salon Partner" : "Client"}
                     </span>
@@ -318,17 +326,22 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={() => openAuth("login")}
-                className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-amber-600/20 active:scale-95 transition-all duration-200 cursor-pointer"
+                className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-amber-600/20 active:scale-95 transition-all duration-200 cursor-pointer leading-none"
               >
                 Sign In
               </button>
             )}
 
-            {/* Mobile Hamburger Menu Toggle */}
+            {/* Mobile Hamburger Menu Button (Exact 40px Box) */}
             <IconButton
               onClick={() => setMobileDrawerOpen(true)}
               className="md:hidden"
-              sx={{ color: "#334155" }}
+              sx={{
+                width: 40,
+                height: 40,
+                color: "#334155",
+                "&:hover": { bgcolor: "#F1F5F9" },
+              }}
               aria-label="Open navigation menu"
             >
               <MenuIcon />
@@ -344,7 +357,7 @@ const Navbar = () => {
         onClose={() => setMobileDrawerOpen(false)}
         PaperProps={{
           sx: {
-            width: 290,
+            width: 300,
             p: 3,
             display: "flex",
             flexDirection: "column",
@@ -355,47 +368,53 @@ const Navbar = () => {
       >
         <div className="space-y-6">
           {/* Drawer Top Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center shadow-sm">
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center shadow-xs shrink-0">
                 <ContentCutIcon sx={{ fontSize: 16 }} className="transform -rotate-45" />
               </div>
-              <span className="font-extrabold text-base text-slate-900 tracking-tight">
-                SALONBOOK
-              </span>
+              <div className="flex flex-col justify-center">
+                <span className="font-extrabold text-base text-slate-900 tracking-tight leading-none">
+                  SALONBOOK<span className="text-amber-500">.</span>
+                </span>
+                <span className="text-[8px] font-extrabold text-amber-600 uppercase tracking-widest leading-none mt-0.5">
+                  Luxury Care
+                </span>
+              </div>
             </div>
 
-            <IconButton size="small" onClick={() => setMobileDrawerOpen(false)}>
+            <IconButton size="small" onClick={() => setMobileDrawerOpen(false)} aria-label="Close menu">
               <CloseIcon fontSize="small" />
             </IconButton>
           </div>
 
           {/* User Status Card in Drawer */}
           {user ? (
-            <div className="p-3 bg-amber-50/60 rounded-2xl border border-amber-200/60 flex items-center gap-3">
-              <Avatar sx={{ bgcolor: "#D97706", width: 40, height: 40, fontWeight: 700 }}>
+            <div className="p-3 bg-amber-50/70 rounded-2xl border border-amber-200/60 flex items-center gap-3">
+              <Avatar sx={{ bgcolor: "#D97706", width: 38, height: 38, fontWeight: 700, fontSize: "0.85rem" }}>
                 {(user.fullName || user.username || "U").slice(0, 1).toUpperCase()}
               </Avatar>
-              <div className="min-w-0">
-                <p className="font-bold text-sm text-slate-900 truncate">
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-sm text-slate-900 truncate leading-snug">
                   {user.fullName || user.username}
                 </p>
-                <p className="text-[11px] text-amber-700 font-semibold capitalize">
+                <p className="text-[11px] text-amber-700 font-semibold capitalize leading-none mt-0.5">
                   {user.role === "SALON_OWNER" ? "Salon Partner" : "Client"}
                 </p>
               </div>
             </div>
           ) : (
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center space-y-2">
-              <p className="text-xs text-slate-500 font-medium">
-                Sign in to manage bookings and salon appointments.
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center space-y-2.5">
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                Sign in to manage appointments, discover stylists, and view booking history.
               </p>
               <button
+                type="button"
                 onClick={() => {
                   setMobileDrawerOpen(false);
                   openAuth("login");
                 }}
-                className="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-xs shadow-sm"
+                className="w-full h-10 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all"
               >
                 Sign In / Register
               </button>
@@ -403,7 +422,7 @@ const Navbar = () => {
           )}
 
           {/* Drawer Navigation Links */}
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col gap-1.5">
             {[
               { label: "Home", path: "/", icon: <HomeOutlinedIcon fontSize="small" /> },
               { label: "Explore Salons", path: "/explore", icon: <ExploreOutlinedIcon fontSize="small" /> },
@@ -425,9 +444,9 @@ const Navbar = () => {
                   setMobileDrawerOpen(false);
                   navigate(item.path);
                 }}
-                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-colors text-left ${
+                className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-sm font-semibold transition-colors text-left ${
                   isActive(item.path)
-                    ? "bg-amber-50 text-amber-700 font-bold"
+                    ? "bg-amber-50 text-amber-700 font-bold border border-amber-200/50"
                     : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
@@ -440,15 +459,16 @@ const Navbar = () => {
           </nav>
         </div>
 
-        {/* Drawer Bottom Action */}
-        <div className="pt-6 border-t border-slate-100 space-y-2">
+        {/* Drawer Bottom Actions */}
+        <div className="pt-4 border-t border-slate-100 space-y-2">
           {user?.role !== "SALON_OWNER" && (
             <button
+              type="button"
               onClick={() => {
                 setMobileDrawerOpen(false);
                 openAuth("signup", "SALON_OWNER");
               }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-amber-500/40 text-amber-700 font-semibold text-xs hover:bg-amber-50 transition-colors"
+              className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 text-amber-700 font-bold text-xs hover:bg-amber-50 transition-colors"
             >
               <StorefrontOutlinedIcon fontSize="small" />
               <span>Partner With Us</span>
@@ -457,8 +477,9 @@ const Navbar = () => {
 
           {user && (
             <button
+              type="button"
               onClick={handleSignOut}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 text-red-600 font-semibold text-xs hover:bg-red-100 transition-colors"
+              className="w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-red-50 text-red-600 font-bold text-xs hover:bg-red-100 transition-colors"
             >
               <LogoutOutlinedIcon fontSize="small" />
               <span>Sign Out</span>
