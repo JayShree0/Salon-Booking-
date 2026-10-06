@@ -7,7 +7,7 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ContentCutIcon from "@mui/icons-material/ContentCut";
+import SparklesIcon from "@mui/icons-material/AutoAwesome";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 
 const TRENDING_SERVICES = [
@@ -16,6 +16,7 @@ const TRENDING_SERVICES = [
   { label: "Bridal Makeup", icon: "💄" },
   { label: "Massage Therapy", icon: "💆" },
   { label: "Pedicure", icon: "💅" },
+  { label: "Hair Spa", icon: "🌿" },
 ];
 
 const Banner = () => {
@@ -39,26 +40,29 @@ const Banner = () => {
   };
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-b from-amber-50/50 via-white to-stone-50/60 pt-6 pb-16 md:py-20 border-b border-slate-200/70">
-      {/* Ambient Warm Golden Sheen Orbs for End-to-End Cohesion */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-10 w-80 h-80 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative w-full overflow-hidden bg-gradient-to-b from-amber-50/60 via-white to-stone-50/50 pt-8 pb-16 md:py-20 border-b border-slate-200/70">
+      {/* Opulent Ambient Warm Glow Orbs for End-to-End Visual Harmony */}
+      <div className="absolute -top-24 right-1/4 w-[32rem] h-[32rem] bg-gradient-to-br from-amber-300/25 to-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 left-10 w-96 h-96 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Editorial Copy & Concierge Search */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+          
+          {/* Left Column: Editorial Typography & Concierge Search */}
           <div className="lg:col-span-7 space-y-7 text-left">
-            {/* Luxury Pre-header Pill */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-amber-100/70 border border-amber-300/80 text-amber-900 text-xs font-bold uppercase tracking-wider shadow-2xs">
+            
+            {/* Pre-Header Luxury Pill Badge */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-amber-100/80 border border-amber-300/80 text-amber-900 text-xs font-bold uppercase tracking-wider shadow-xs">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-600"></span>
               </span>
+              <SparklesIcon sx={{ fontSize: 14 }} className="text-amber-600" />
               <span>Premier Salon & Spa Concierge</span>
             </div>
 
-            {/* Main Headline */}
-            <div className="space-y-3">
+            {/* Main Editorial Headline */}
+            <div className="space-y-3.5">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.12]">
                 Where Elegance Meets{" "}
                 <span className="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-700 bg-clip-text text-transparent">
@@ -76,7 +80,7 @@ const Banner = () => {
             <div className="w-full max-w-2xl pt-1">
               <form
                 onSubmit={handleSearch}
-                className="flex flex-col sm:flex-row items-center gap-2 p-2 sm:p-2.5 bg-white rounded-2xl sm:rounded-full shadow-[0_15px_40px_-10px_rgba(217,119,6,0.15)] border border-slate-200/90 focus-within:border-amber-500/80 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all duration-300"
+                className="flex flex-col sm:flex-row items-center gap-2 p-2 sm:p-2.5 bg-white rounded-2xl sm:rounded-full shadow-[0_18px_45px_-10px_rgba(217,119,6,0.18)] border border-slate-200/90 focus-within:border-amber-500/80 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all duration-300"
               >
                 {/* Search Input Field */}
                 <div className="flex items-center gap-3 px-4 py-2 w-full flex-1 text-left">
@@ -108,7 +112,7 @@ const Banner = () => {
                     key={item.label}
                     type="button"
                     onClick={() => handleQuickTagClick(item.label)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-amber-50 border border-slate-200/90 hover:border-amber-400/80 text-slate-700 hover:text-amber-900 font-semibold shadow-2xs transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-amber-50 border border-slate-200/90 hover:border-amber-400/80 text-slate-700 hover:text-amber-900 font-semibold shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
                   >
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
@@ -125,7 +129,7 @@ const Banner = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-slate-900 leading-tight">4.9 / 5 Rating</p>
-                  <p className="text-[11px] text-slate-500 leading-none">15k+ Reviews</p>
+                  <p className="text-[11px] text-slate-500 leading-none mt-0.5">25k+ Reviews</p>
                 </div>
               </div>
 
@@ -135,7 +139,7 @@ const Banner = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-slate-900 leading-tight">100% Verified</p>
-                  <p className="text-[11px] text-slate-500 leading-none">Hygiene Audited</p>
+                  <p className="text-[11px] text-slate-500 leading-none mt-0.5">Hygiene Audited</p>
                 </div>
               </div>
 
@@ -145,7 +149,7 @@ const Banner = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-slate-900 leading-tight">Instant Sync</p>
-                  <p className="text-[11px] text-slate-500 leading-none">Live Available Slots</p>
+                  <p className="text-[11px] text-slate-500 leading-none mt-0.5">Live Available Slots</p>
                 </div>
               </div>
 
@@ -155,27 +159,29 @@ const Banner = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-slate-900 leading-tight">Best Pricing</p>
-                  <p className="text-[11px] text-slate-500 leading-none">Zero Hidden Fees</p>
+                  <p className="text-[11px] text-slate-500 leading-none mt-0.5">Zero Hidden Fees</p>
                 </div>
               </div>
             </div>
+
           </div>
 
           {/* Right Column: Interactive Luxury Salon Showcase Visuals */}
           <div className="lg:col-span-5 relative flex items-center justify-center">
+            
             {/* Ambient Background Radial Glow */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-amber-400/5 to-transparent rounded-3xl filter blur-2xl transform scale-95 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/15 via-amber-400/10 to-transparent rounded-3xl filter blur-2xl transform scale-95 pointer-events-none" />
 
             {/* Main Luxury Hero Image Card */}
             <div className="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100 group">
               <img
                 src="https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=1200"
                 alt="Luxury Salon Experience"
-                className="w-full h-[430px] sm:h-[480px] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                className="w-full h-[440px] sm:h-[490px] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
 
               {/* Subtle Warm Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/15 to-transparent pointer-events-none" />
 
               {/* Bottom Card Title Badge */}
               <div className="absolute bottom-5 left-5 right-5 text-left text-white">
@@ -193,7 +199,7 @@ const Banner = () => {
             </div>
 
             {/* Floating Glassmorphic Badge 1: Top Left Rating Pill */}
-            <div className="absolute -top-4 -left-4 sm:-left-6 backdrop-blur-xl bg-white/95 border border-slate-200/90 shadow-xl rounded-2xl p-3 flex items-center gap-3 animate-bounce-subtle z-20">
+            <div className="absolute -top-4 -left-4 sm:-left-6 backdrop-blur-xl bg-white/95 border border-slate-200/90 shadow-xl rounded-2xl p-3 flex items-center gap-3 z-20">
               <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
                 <StarIcon sx={{ fontSize: 20 }} />
               </div>
@@ -235,7 +241,9 @@ const Banner = () => {
                 <p className="text-[10px] text-amber-600 font-semibold">From ₹799</p>
               </div>
             </div>
+
           </div>
+
         </div>
       </div>
     </div>
