@@ -48,23 +48,11 @@ const Home = () => {
             </button>
           </div>
 
-          {/* 5 Cards in Line 1, 3 Cards in Line 2 (Centered) */}
-          <div className="space-y-3.5 sm:space-y-4">
-            {/* Line 1: 5 Category Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
-              {services.slice(0, 5).map((item) => (
-                <HomeServiceCard key={item.id} item={item} />
-              ))}
-            </div>
-
-            {/* Line 2: 3 Category Cards (Centered on Desktop) */}
-            <div className="flex flex-wrap justify-center gap-3.5 sm:gap-4">
-              {services.slice(5, 8).map((item) => (
-                <div key={item.id} className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.75rem)] md:w-[calc(20%-0.8rem)]">
-                  <HomeServiceCard item={item} />
-                </div>
-              ))}
-            </div>
+          {/* 5 in Line 1, 3 in Line 2 (Starting from Start / Left-Aligned) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
+            {services.map((item) => (
+              <HomeServiceCard key={item.id} item={item} />
+            ))}
           </div>
         </section>
 
