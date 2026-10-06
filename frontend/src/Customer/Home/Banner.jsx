@@ -8,7 +8,6 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SparklesIcon from "@mui/icons-material/AutoAwesome";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 
 const TRENDING_SERVICES = [
   { label: "Hair cut", icon: "✂️" },
@@ -218,7 +217,7 @@ const Banner = () => {
                 <CheckCircleIcon sx={{ fontSize: 20 }} />
               </div>
               <div className="text-left">
-                <p className="text-xs font-extrabold text-slate-900 leading-tight">
+                <p className="text-xs font-bold text-slate-900 leading-tight">
                   Instant Confirmation
                 </p>
                 <p className="text-[11px] text-slate-500 leading-snug mt-0.5">
