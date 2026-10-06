@@ -2,14 +2,14 @@ import { FiberManualRecord } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import React from "react";
 
-const ServiceCard = () => {
+const ServiceCard = ({ service, selected, onToggle }) => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between gap-5">
         <div className="space-y-1 w-[60%]">
-          <h1 className="text-2xl font-semibold">Man Beard</h1>
-          <p className="text-gray-500 text-sm">Stylish man beard</p>
-          <p>₹399</p>
+          <h2 className="text-xl font-semibold">{service.name}</h2>
+          <p className="text-gray-500 text-sm">{service.description}</p>
+          <p>₹{service.price}</p>
 
           <div className="flex items-center gap-3">
             <FiberManualRecord
@@ -18,14 +18,14 @@ const ServiceCard = () => {
                 color: "gray",
               }}
             />
-            <p>45 mins</p>
+            <p>{service.duration} mins</p>
           </div>
         </div>
 
         <div className="space-y-3">
-            <img className="w-32 h-32 object-cover rounded-md" src="https://images.unsplash.com/photo-1684868265714-fd2300637c23?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YnJpZGFsJTIwbWFrZXVwfGVufDB8fDB8fHww" alt="" />
-            <Button fullWidth variant="outlined">
-                Add
+            <img className="w-32 h-32 object-cover rounded-md" src={service.image || "https://images.pexels.com/photos/3998415/pexels-photo-3998415.jpeg?auto=compress&cs=tinysrgb&w=300"} alt={service.name} />
+            <Button fullWidth variant={selected ? "contained" : "outlined"} onClick={onToggle}>
+              {selected ? "Remove" : "Add"}
             </Button>
 
         </div>

@@ -12,6 +12,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import DrawerList from "../../Admin-Salon/DrawerList";
 
 const menu = [
@@ -75,12 +76,23 @@ const menu2 = [
   {
     name: "Logout",
     path: "/",
+    logout: true,
     icon: <Logout className="text-primary-color" />,
     activeIcon: <Logout className="text-secondary-color" />,
   },
 ];
 const SalonDrawerList = ({ toggleDrawer = () => () => {} }) => {
-  return <DrawerList menu={menu} menu2={menu2} toggleDrawer={toggleDrawer} />;
+  const navigate = useNavigate();
+
+  // Removing the saved tokens signs the user out of the whole app.
+  const handleLogout = () => {
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("role");
+    navigate("/");
+  };
+
+  return <DrawerList menu={menu} menu2={menu2} toggleDrawer={toggleDrawer} onLogout={handleLogout} />;
 };
 
 export default SalonDrawerList;

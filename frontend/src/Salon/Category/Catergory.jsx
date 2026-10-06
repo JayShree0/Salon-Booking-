@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import React, { useState } from "react";
-import CategoryTables from "./Categorytable";
-import CategoryForm from "./categoryform";
+import CategoryTables from "./CategoryTable";
+import CategoryForm from "./CategoryForm";
 
 const Catergory = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -25,7 +25,7 @@ const Catergory = () => {
       </div>
 
       <div className="mt-10">
-        {activeTab === 1 ? <CategoryTables/> : <CategoryForm/>}
+          {activeTab === 1 ? <CategoryTables/> : <CategoryForm onCreated={() => setActiveTab(1)}/>}
       </div>
     </div>
   );

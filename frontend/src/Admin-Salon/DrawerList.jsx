@@ -2,11 +2,18 @@ import { Divider, ListItemIcon, ListItemText } from "@mui/material";
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const DrawerList = ({ menu, menu2, toggleDrawer }) => {
+const DrawerList = ({ menu, menu2, toggleDrawer, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const handleClick = (item) => () => {
-    navigate(item.path);
+    // The logout item has to clear the saved tokens,
+    // so we call the logout function instead of navigating.
+    if (item.logout && onLogout) {
+      onLogout();
+    } else {
+      navigate(item.path);
+    }
+
     if (toggleDrawer) {
       toggleDrawer(false)();
     }

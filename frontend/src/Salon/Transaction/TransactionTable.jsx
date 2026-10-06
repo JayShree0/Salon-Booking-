@@ -1,51 +1,60 @@
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
+import React, { useEffect, useState } from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import api from "../../config/api";
 
 export default function TransactionTable() {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.get("/api/payments/salon")
+      .then(({ data }) => setPayments(data || []))
+      .catch((requestError) => setError(requestError.response?.data?.message || requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <section>
+      <h1 className="pb-5 font-bold text-2xl">Transactions</h1>
+      {loading && <p className="py-4">Loading transactions...</p>}
+      {error && <p role="alert" className="py-4 text-red-700">{error}</p>}
+      {!loading && !error && payments.length === 0 && <p className="py-4">No payments have been recorded yet.</p>}
+      <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="salon payment transactions">
         <TableHead>
           <TableRow>
-            <TableCell>Date</TableCell>
-            <TableCell align="right">Customer Details</TableCell>
-            <TableCell align="right">Booking(g)</TableCell>
-            <TableCell align="right">Amount&nbsp;(g)</TableCell>
+            <TableCell>Payment</TableCell>
+            <TableCell align="right">Booking</TableCell>
+            <TableCell align="right">Method</TableCell>
+            <TableCell align="right">Amount</TableCell>
+            <TableCell align="right">Status</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
+          {payments.map((payment) => (
             <TableRow
-              key={row.name}
+              key={payment.id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                {row.name}
+                #{payment.id}
               </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
-              <TableCell align="right">{row.fat}</TableCell>
-              <TableCell align="right">{row.carbs}</TableCell>
+              <TableCell align="right">#{payment.bookingId}</TableCell>
+              <TableCell align="right">{payment.paymentMethod}</TableCell>
+              <TableCell align="right">₹{payment.amount}</TableCell>
+              <TableCell align="right">{payment.status}</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
+    </section>
   );
 }

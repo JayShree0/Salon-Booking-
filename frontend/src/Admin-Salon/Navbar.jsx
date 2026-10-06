@@ -2,10 +2,12 @@ import { NotificationsActive } from '@mui/icons-material'
 import { Badge, Drawer, IconButton } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = ({DrawerList}) => {
 
     const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
 
     const toggleDrawer = (newOpen) => () => {
         setOpen(newOpen)
@@ -25,7 +27,7 @@ const Navbar = ({DrawerList}) => {
 
         </div>
 
-        <IconButton>
+        <IconButton onClick={() => navigate("/salon-dashboard/notifications")}>
             <Badge color='secondary'>
                 <NotificationsActive color='primary'/>
             </Badge>

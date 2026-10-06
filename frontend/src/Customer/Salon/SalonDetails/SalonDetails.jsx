@@ -29,6 +29,7 @@ const SalonDetails = () => {
         <div className="flex gap-4">
           {tabs.map((tab) => (
             <Button
+              key={tab.name}
               onClick={() => handleActivetab(tab)}
               variant={tab.name == activeTab.name ? "contained" : "outlined"}
             >
@@ -43,7 +44,7 @@ const SalonDetails = () => {
       <div>
         {activeTab.name === "Create Review" ? (
           <div className="flex justify-center">
-            <CreateReviewForm />
+            <CreateReviewForm onReviewCreated={() => setActiveTab(tabs[1])} />
           </div>
         ) : activeTab.name === "Reviews" ? (
           <div>

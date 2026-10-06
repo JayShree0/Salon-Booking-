@@ -8,22 +8,34 @@
 
 // export default CreateServiceForm
 
-import { AddPhotoAlternate, Close } from "@mui/icons-material";
-import {
-  Button,
-  CircularProgress,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useFormik } from "formik";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../config/api";
 
 const CreateServiceForm = () => {
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+  const [error, setError] = useState("");
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const { data: salon } = await api.get("/api/salons/owner");
+        const { data } = await api.get(`/api/categories/salon/${salon.id}`);
+        setCategories(data || []);
+      } catch (requestError) {
+        setError(requestError.response?.data?.message || requestError.message);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -33,8 +45,19 @@ const CreateServiceForm = () => {
       duration: "",
       category: "",
     },
-    onSubmit: (values) => {
-      console.log("Submitting", values);
+    onSubmit: async (values) => {
+      setError("");
+      try {
+        await api.post("/api/service-offering/salon-owner", {
+          ...values,
+          price: Number(values.price),
+          duration: Number(values.duration),
+          category: Number(values.category),
+        });
+        navigate("/salon-dashboard/services");
+      } catch (requestError) {
+        setError(requestError.response?.data?.message || requestError.message);
+      }
     },
   });
   return (
@@ -44,46 +67,6 @@ const CreateServiceForm = () => {
         className="space-y-4 p-4 w-full lg:w-1/2"
       >
         <Grid container spacing={2}>
-          <Grid className="w-24 h-24" size={{ xs: 12 }}>
-            {false ? (
-              <div className="relative border">
-                <img
-                  className="w-24 h-24 object-cover"
-                  src="https://cdn.pixabay.com/photo/2020/05/24/02/00/barber-shop-5212059_1280.jpg"
-                  alt=""
-                />
-                <IconButton
-                  className=""
-                  size="small"
-                  color="error"
-                  sx={{ position: "absolute", top: 0, right: 0 }}
-                >
-                  <Close sx={{ fontSize: "1rem" }} />
-                </IconButton>
-              </div>
-            ) : (
-              <>
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="fileInput"
-                  style={{
-                    display: "none",
-                  }}
-                />
-                <label className="relative" htmlFor="fileInput">
-                  <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-400">
-                    <AddPhotoAlternate className="text-gray-700" />
-                  </span>
-                  {false && (
-                    <div className="absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center">
-                      <CircularProgress />
-                    </div>
-                  )}
-                </label>
-              </>
-            )}
-          </Grid>
           <Grid size={12}>
             <TextField
               fullWidth
@@ -135,32 +118,38 @@ const CreateServiceForm = () => {
           </Grid>
 
           <Grid size={{ xs: 12 }}>
+            <TextField fullWidth id="image" name="image" label="Image URL (optional)" value={formik.values.image} onChange={formik.handleChange} />
+          </Grid>
+
+          <Grid size={12}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Category</InputLabel>
+              <InputLabel id="service-category-label">Category</InputLabel>
               <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+                labelId="service-category-label"
+                id="category"
                 value={formik.values.category}
-                label="category"
+                label="Category"
                 name="category"
                 onChange={formik.handleChange}
+                required
               >
-                
-                {/* This category will come form the backend and it should be the list of categories in the drop down menu*/}
-                {[1,1,1,1,1,1].map((item, index) => <MenuItem value={"haircut" + index}>Hair cut</MenuItem>)}
+                {categories.map((category) => <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
 
           <Grid size={12}>
+            {error && <p role="alert" className="text-red-700">{error}</p>}
             <Button
               type="submit"
-              variant="outlined"
+              variant="contained"
               fullWidth
               sx={{ py: ".8rem" }}
+              disabled={formik.isSubmitting || loadingCategories || categories.length === 0}
             >
-              Create Category
+              {formik.isSubmitting ? "Creating..." : "Create service"}
             </Button>
+            {!loadingCategories && categories.length === 0 && <p className="pt-2 text-sm text-gray-600">Create a category before adding services.</p>}
           </Grid>
         </Grid>
       </form>
