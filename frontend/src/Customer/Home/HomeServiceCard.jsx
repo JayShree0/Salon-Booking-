@@ -33,18 +33,18 @@ const HomeServiceCard = ({ item }) => {
       {/* Subtle Amber Glow Border on Hover */}
       <div className="absolute inset-0 rounded-2xl sm:rounded-3xl border-2 border-transparent group-hover:border-amber-400/50 transition-colors duration-300 pointer-events-none" />
 
-      {/* Bottom Content: Category Title, Subtitle, and Gold Circular Button */}
-      <div className="relative z-10 p-3 sm:p-4 lg:p-5 text-white text-left space-y-1 min-w-0">
-        <h3 className="font-extrabold text-base sm:text-lg tracking-tight leading-snug text-white group-hover:text-amber-300 transition-colors duration-200 line-clamp-1 drop-shadow-xs">
+      {/* Bottom Content: Refined Typography Scaled Harmoniously With the Card */}
+      <div className="relative z-10 p-3 sm:p-3.5 lg:p-4 text-white text-left space-y-0.5 sm:space-y-1 min-w-0">
+        <h3 className="font-bold text-sm sm:text-base tracking-tight leading-snug text-white group-hover:text-amber-300 transition-colors duration-200 line-clamp-1">
           {item.name}
         </h3>
 
-        <div className="flex items-center justify-between gap-2 min-w-0 text-slate-200 group-hover:text-amber-200 transition-colors pt-0.5">
-          <span className="text-xs sm:text-sm font-medium text-slate-200/90 leading-none truncate">
+        <div className="flex items-center justify-between gap-1.5 min-w-0 text-slate-300 group-hover:text-amber-200 transition-colors pt-0.5">
+          <span className="text-[11px] sm:text-xs font-medium text-slate-300 leading-none truncate">
             Book Treatment
           </span>
-          <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#B48C54] hover:bg-amber-600 text-white flex items-center justify-center shadow-md transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:scale-105 shrink-0">
-            <ArrowForwardIosIcon sx={{ fontSize: 10 }} />
+          <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#B48C54] hover:bg-amber-600 text-white flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:scale-105 shrink-0">
+            <ArrowForwardIosIcon sx={{ fontSize: 9 }} />
           </span>
         </div>
       </div>
