@@ -40,3 +40,4 @@ export const services = [
     image: "https://images.pexels.com/photos/5069455/pexels-photo-5069455.jpeg?auto=compress&cs=tinysrgb&w=800",
   },
 ];
+

@@ -14,9 +14,9 @@ const HomeServiceCard = ({ item }) => {
   return (
     <div
       onClick={handleClick}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl bg-slate-950 shadow-xs hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 border border-slate-200/80 flex flex-col justify-end w-full aspect-[3/4]"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl bg-slate-950 shadow-xs hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 border border-slate-200/80 flex flex-col justify-end w-full h-36 sm:h-40 md:h-44"
     >
-      {/* High-Quality Portrait Photo with object-fit: cover */}
+      {/* High-Quality Portrait Photo with Shorter, Compact Aspect Ratio */}
       <img
         src={item.image}
         alt={item.name}
