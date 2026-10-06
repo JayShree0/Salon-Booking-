@@ -51,12 +51,12 @@ export const fetchSalons = () => async (dispatch) => {
     })
 
     try {
+        const jwt = localStorage.getItem("jwt");
+        const headers = (jwt && jwt !== "null" && jwt !== "undefined")
+            ? { Authorization: `Bearer ${jwt}` }
+            : {};
 
-        const response = await api.get(API_BASE_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("jwt")}`
-            }
-        })
+        const response = await api.get(API_BASE_URL, { headers });
 
         dispatch({ type: FETCH_SALONS_SUCCESS, payload: response.data })
     }
@@ -115,11 +115,13 @@ export const searchSalons = (jwt, city) => async (dispatch) => {
     })
 
     try {
+        const token = jwt || localStorage.getItem("jwt");
+        const headers = (token && token !== "null" && token !== "undefined")
+            ? { Authorization: `Bearer ${token}` }
+            : {};
 
         const response = await api.get(`${API_BASE_URL}/search`, {
-            headers: {
-                Authorization: `Bearer ${jwt}`
-            },
+            headers,
             params: {
                 city: city
             }

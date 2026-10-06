@@ -7,8 +7,55 @@ import { SalonCardSkeleton } from "../../components/common/SkeletonCard";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloudOffOutlinedIcon from "@mui/icons-material/CloudOffOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 
 const POPULAR_CITIES = ["All", "Mumbai", "Delhi", "Bangalore", "Pune"];
+
+const getFriendlyErrorInfo = (rawError) => {
+  if (!rawError) return null;
+  const errStr = String(rawError).toLowerCase();
+
+  if (errStr.includes("401") || errStr.includes("unauthorized")) {
+    return {
+      badge: "Connection Updating",
+      title: "Our Salon Directory Is Momentarily Resting",
+      subtitle:
+        "Our salon service is currently refreshing its connection or restarting. Please try reconnecting below — no booking history has been affected.",
+    };
+  }
+
+  if (
+    errStr.includes("network") ||
+    errStr.includes("connect") ||
+    errStr.includes("timeout") ||
+    errStr.includes("econnrefused") ||
+    errStr.includes("failed to fetch")
+  ) {
+    return {
+      badge: "Server Temporarily Offline",
+      title: "Unable to Reach Our Salon Network",
+      subtitle:
+        "Our salon servers appear to be temporarily offline or undergoing quick scheduled maintenance. Please check your internet connection or try again in a few moments.",
+    };
+  }
+
+  if (errStr.includes("500") || errStr.includes("502") || errStr.includes("503") || errStr.includes("504")) {
+    return {
+      badge: "Maintenance In Progress",
+      title: "Service Momentarily Unavailable",
+      subtitle:
+        "Our systems are currently handling a brief service update. Everything should be back up and running smoothly very soon.",
+    };
+  }
+
+  return {
+    badge: "Temporary Hiccup",
+    title: "Unable to Load Salons Right Now",
+    subtitle:
+      "We're having trouble connecting to our salon partners right now. Please try reconnecting below, or explore our signature treatment categories above.",
+  };
+};
 
 const SalonList = () => {
   const dispatch = useDispatch();
@@ -20,6 +67,15 @@ const SalonList = () => {
   const [city, setCity] = useState(cityFromUrl);
   const [activeCityPill, setActiveCityPill] = useState(cityFromUrl || "All");
   const [hasSearched, setHasSearched] = useState(Boolean(cityFromUrl));
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+
+  const handleRetry = () => {
+    setIsRetrying(true);
+    dispatch(fetchSalons()).finally(() => {
+      setTimeout(() => setIsRetrying(false), 600);
+    });
+  };
 
   const salonsToShow = hasSearched ? searchResults : salons;
 
@@ -145,18 +201,105 @@ const SalonList = () => {
         </div>
       )}
 
-      {/* Error Message */}
-      {error && (
-        <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-center space-y-2">
-          <p className="text-red-700 text-sm font-semibold">{error}</p>
-          <button
-            onClick={() => dispatch(fetchSalons())}
-            className="text-xs text-red-600 underline hover:text-red-800"
-          >
-            Try reloading salons
-          </button>
-        </div>
-      )}
+      {/* Friendly, Human-Centered Server Down / Error State */}
+      {error && (() => {
+        const friendly = getFriendlyErrorInfo(error);
+        return (
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border border-amber-200/70 p-8 sm:p-12 text-center shadow-sm">
+            {/* Ambient Warm Blur Glows */}
+            <div className="absolute -top-16 -right-16 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-amber-600/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="relative z-10 max-w-lg mx-auto space-y-5">
+              {/* Soft Icon Badge with Pulse Indicator */}
+              <div className="relative inline-flex items-center justify-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-amber-100 to-amber-50 text-amber-700 flex items-center justify-center shadow-md shadow-amber-500/10 border border-amber-200">
+                  <CloudOffOutlinedIcon sx={{ fontSize: 36 }} />
+                </div>
+                <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500 border-2 border-white" />
+                </span>
+              </div>
+
+              {/* Status Pill Badge */}
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100/80 border border-amber-300/80 shadow-2xs">
+                  {friendly.badge}
+                </span>
+              </div>
+
+              {/* Clear, Non-Technical Headline */}
+              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                {friendly.title}
+              </h3>
+
+              {/* Friendly, Reassuring Explanation */}
+              <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                {friendly.subtitle}
+              </p>
+
+              {/* Helpful Everyday Advice Checklist */}
+              <div className="bg-white/80 backdrop-blur-xs border border-slate-200/80 rounded-2xl p-4 text-left text-xs text-slate-600 space-y-2 shadow-2xs">
+                <p className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">What you can do:</p>
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-600 font-bold">1.</span>
+                  <span>Click <strong>"Try Reconnecting"</strong> below to reload salon availability.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-600 font-bold">2.</span>
+                  <span>Check that your internet connection is active and stable.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-600 font-bold">3.</span>
+                  <span>Explore the <strong>Signature Experiences</strong> categories above in the meantime.</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  disabled={isRetrying}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-md shadow-amber-600/20 active:scale-95 disabled:opacity-60 transition-all cursor-pointer leading-none"
+                >
+                  <RefreshOutlinedIcon sx={{ fontSize: 18 }} className={isRetrying ? "animate-spin" : ""} />
+                  <span>{isRetrying ? "Reconnecting..." : "Try Reconnecting"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs sm:text-sm shadow-2xs hover:border-slate-300 transition-all cursor-pointer leading-none"
+                >
+                  <span>Browse Categories Above</span>
+                </button>
+              </div>
+
+              {/* Optional Collapsible Diagnostic Details (for developers / support) */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+                  className="text-[11px] text-slate-400 hover:text-slate-600 underline transition-colors cursor-pointer"
+                >
+                  {showTechnicalDetails ? "Hide technical diagnostic" : "Need technical info? (For developers)"}
+                </button>
+
+                {showTechnicalDetails && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-900 text-slate-300 text-[11px] font-mono text-left overflow-x-auto shadow-inner">
+                    <p className="text-slate-400 font-semibold mb-1">// System diagnostic code:</p>
+                    <p className="text-amber-400 break-all">{String(error)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Empty State */}
       {!loading && !error && salonsToShow.length === 0 && (

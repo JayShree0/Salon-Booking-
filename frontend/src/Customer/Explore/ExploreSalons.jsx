@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { TextField, InputAdornment, Rating, Chip, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import CloudOffOutlinedIcon from "@mui/icons-material/CloudOffOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import SalonCard from "../Salon/SalonCard";
 import { SalonCardSkeleton } from "../../components/common/SkeletonCard";
 import EmptyState from "../../components/common/EmptyState";
@@ -13,7 +15,7 @@ import { services } from "../../Data/services";
 const ExploreSalons = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { salons, loading } = useSelector((state) => state.salon);
+  const { salons, loading, error } = useSelector((state) => state.salon);
 
   const initialCity = searchParams.get("city") || "";
   const initialCategory = searchParams.get("category") || "";
@@ -187,7 +189,38 @@ const ExploreSalons = () => {
               </div>
             )}
 
-            {!loading && sortedSalons.length === 0 && (
+            {!loading && error && (
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-amber-50/50 via-white to-slate-50/80 border border-amber-200/70 p-8 sm:p-10 text-center shadow-sm">
+                <div className="max-w-md mx-auto space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 mx-auto flex items-center justify-center shadow-sm border border-amber-200">
+                    <CloudOffOutlinedIcon sx={{ fontSize: 28 }} />
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100/80 border border-amber-300/80">
+                      Service Temporarily Offline
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                    Unable to Reach Salon Directory
+                  </h3>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    Our salon network is momentarily taking a break or updating. Please check back in a moment or try reconnecting below.
+                  </p>
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => dispatch(fetchSalons())}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all cursor-pointer"
+                    >
+                      <RefreshOutlinedIcon sx={{ fontSize: 16 }} />
+                      <span>Try Reconnecting</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!loading && !error && sortedSalons.length === 0 && (
               <EmptyState
                 icon="✂️"
                 title="No Matching Salons Found"
@@ -197,7 +230,7 @@ const ExploreSalons = () => {
               />
             )}
 
-            {!loading && sortedSalons.length > 0 && (
+            {!loading && !error && sortedSalons.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {sortedSalons.map((salon) => (
                   <SalonCard key={salon.id} item={salon} />
