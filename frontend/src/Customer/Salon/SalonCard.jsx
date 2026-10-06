@@ -79,3 +79,4 @@ const SalonCard = ({ item }) => {
 };
 
 export default SalonCard;
+

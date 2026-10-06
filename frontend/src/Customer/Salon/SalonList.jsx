@@ -206,3 +206,4 @@ const SalonList = () => {
 };
 
 export default SalonList;
+
