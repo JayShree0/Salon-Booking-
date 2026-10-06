@@ -247,12 +247,13 @@ const Navbar = () => {
                   elevation={0}
                   PaperProps={{
                     sx: {
-                      mt: 1.5,
+                      mt: 2.75,
                       width: 260,
                       borderRadius: "18px",
                       boxShadow: "0 12px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.05)",
                       border: "1px solid rgba(226, 232, 240, 0.9)",
                       p: 1.25,
+                      pt: 1.75,
                       overflow: "visible",
                     },
                   }}
@@ -280,7 +281,7 @@ const Navbar = () => {
                     </div>
                   </div>
 
-                  <Divider sx={{ my: 0.75, borderColor: "rgba(241, 245, 249, 0.9)" }} />
+                  <Divider sx={{ my: 1, borderColor: "rgba(241, 245, 249, 0.9)" }} />
 
                   {/* 1. My Profile */}
                   <MenuItem
@@ -490,7 +491,7 @@ const Navbar = () => {
       >
         <div className="space-y-6">
           {/* Drawer Top Header */}
-          <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+          <div className="flex items-center justify-between pt-1 pb-4 border-b border-slate-100">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center shadow-xs shrink-0">
                 <ContentCutIcon sx={{ fontSize: 16 }} className="transform -rotate-45" />
