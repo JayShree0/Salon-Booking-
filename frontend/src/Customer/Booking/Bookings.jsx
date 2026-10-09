@@ -53,6 +53,39 @@ const Bookings = () => {
     }
   };
 
+  const userRole = localStorage.getItem("role") || "";
+  const isSalonOwner = Boolean(localStorage.getItem("jwt")) && (userRole === "SALON_OWNER" || userRole === "ROLE_SALON_OWNER");
+
+  if (isSalonOwner) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 min-h-[75vh]">
+        <div className="mb-6 sm:mb-8 text-left space-y-1.5">
+          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] uppercase tracking-wider font-extrabold text-amber-700 bg-amber-50/90 px-3 py-1 rounded-full border border-amber-300/80 shadow-2xs">
+            PARTNER ACCESS
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Client Bookings Restricted
+          </h1>
+          <p className="text-slate-500 text-xs sm:text-sm">
+            You are signed in with a Salon Partner account. Customer booking records are only accessible to customer accounts.
+          </p>
+        </div>
+        <div className="p-8 bg-white rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm">
+          <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+            To view, schedule, and manage appointments for your own salon, please visit your Salon Dashboard.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/salon-dashboard/bookings")}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+          >
+            <span>Open Salon Appointments</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 min-h-[75vh]">
       {/* Header section with badge matching website aesthetic */}

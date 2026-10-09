@@ -7,12 +7,13 @@ export const bookingApi = {
   },
 
   getUserBookings: async () => {
-    const response = await api.get("/api/bookings/user");
+    const response = await api.get("/api/bookings/customer");
     return response.data || [];
   },
 
-  getSalonBookings: async (salonId) => {
-    const response = await api.get(`/api/bookings/salon/${salonId}`);
+  getSalonBookings: async () => {
+    // Salon is resolved from the JWT server-side (GET /api/bookings/salon)
+    const response = await api.get("/api/bookings/salon");
     return response.data || [];
   },
 

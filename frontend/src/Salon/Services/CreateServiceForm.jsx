@@ -1,23 +1,17 @@
-// import React from 'react'
-
-// const CreateServiceForm = () => {
-//   return (
-//     <div>CreateServiceForm</div>
-//   )
-// }
-
-// export default CreateServiceForm
-
-import { Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  ArrowBack,
+  CheckCircleOutlined,
+} from "@mui/icons-material";
 import api from "../../config/api";
 
 const CreateServiceForm = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   useEffect(() => {
@@ -47,6 +41,7 @@ const CreateServiceForm = () => {
     },
     onSubmit: async (values) => {
       setError("");
+      setSubmitting(true);
       try {
         await api.post("/api/service-offering/salon-owner", {
           ...values,
@@ -57,102 +52,176 @@ const CreateServiceForm = () => {
         navigate("/salon-dashboard/services");
       } catch (requestError) {
         setError(requestError.response?.data?.message || requestError.message);
+      } finally {
+        setSubmitting(false);
       }
     },
   });
+
   return (
-    <div className="flex justify-center items-center">
-      <form
-        onSubmit={formik.handleSubmit}
-        className="space-y-4 p-4 w-full lg:w-1/2"
-      >
-        <Grid container spacing={2}>
-          <Grid size={12}>
-            <TextField
-              fullWidth
-              id="name"
+    <div className="max-w-3xl mx-auto space-y-6">
+      {/* 1. Back link and header */}
+      <div className="flex items-center justify-between">
+        <Link
+          to="/salon-dashboard/services"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+        >
+          <ArrowBack sx={{ fontSize: 16 }} />
+          <span>Back to Catalog</span>
+        </Link>
+      </div>
+
+      <div className="space-y-1">
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          Add New Salon Service
+        </h1>
+        <p className="text-xs text-slate-500">
+          Create a new service offering and make it available immediately for online customer bookings.
+        </p>
+      </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+          {error}
+        </div>
+      )}
+
+      {/* 2. Main Form Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs p-6 sm:p-8">
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
+          {/* Service Title */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700">Service Title *</label>
+            <input
+              type="text"
               name="name"
-              label="name"
+              placeholder="e.g. Classic Hair Cut, Deep Tissue Massage..."
               value={formik.values.name}
               onChange={formik.handleChange}
               required
+              className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-amber-500 focus:bg-white text-slate-900 transition-colors"
             />
-          </Grid>
+          </div>
 
-          <Grid size={12}>
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              id="description"
-              name="description"
-              label="description"
-              value={formik.values.description}
+          {/* Category Dropdown */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700">Category *</label>
+            <select
+              name="category"
+              value={formik.values.category}
               onChange={formik.handleChange}
               required
-            />
-          </Grid>
+              disabled={loadingCategories}
+              className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-amber-500 focus:bg-white text-slate-900 transition-colors cursor-pointer"
+            >
+              <option value="">Select a category for this service...</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {categories.length === 0 && !loadingCategories && (
+              <p className="text-[11px] text-amber-700 font-semibold">
+                No categories found. Please create a category first in the Categories tab.
+              </p>
+            )}
+          </div>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              id="price"
-              name="price"
-              label="price"
-              value={formik.values.price}
-              onChange={formik.handleChange}
-              required
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              id="duration"
-              name="duration"
-              label="duration"
-              value={formik.values.duration}
-              onChange={formik.handleChange}
-              required
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <TextField fullWidth id="image" name="image" label="Image URL (optional)" value={formik.values.image} onChange={formik.handleChange} />
-          </Grid>
-
-          <Grid size={12}>
-            <FormControl fullWidth>
-              <InputLabel id="service-category-label">Category</InputLabel>
-              <Select
-                labelId="service-category-label"
-                id="category"
-                value={formik.values.category}
-                label="Category"
-                name="category"
+          {/* Pricing and Duration in two columns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">Price (INR ₹) *</label>
+              <input
+                type="number"
+                name="price"
+                placeholder="e.g. 499"
+                min="0"
+                value={formik.values.price}
                 onChange={formik.handleChange}
                 required
-              >
-                {categories.map((category) => <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Grid>
+                className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-amber-500 focus:bg-white text-slate-900 transition-colors"
+              />
+            </div>
 
-          <Grid size={12}>
-            {error && <p role="alert" className="text-red-700">{error}</p>}
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              sx={{ py: ".8rem" }}
-              disabled={formik.isSubmitting || loadingCategories || categories.length === 0}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">Duration (Minutes) *</label>
+              <input
+                type="number"
+                name="duration"
+                placeholder="e.g. 45"
+                min="5"
+                step="5"
+                value={formik.values.duration}
+                onChange={formik.handleChange}
+                required
+                className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-amber-500 focus:bg-white text-slate-900 transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700">Description</label>
+            <textarea
+              name="description"
+              rows="3"
+              placeholder="Explain the treatment steps, benefits, products used, and what is included..."
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-amber-500 focus:bg-white text-slate-900 transition-colors leading-relaxed"
+            />
+          </div>
+
+          {/* Image URL with live preview */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-700">Service Image URL</label>
+            <input
+              type="url"
+              name="image"
+              placeholder="https://images.pexels.com/..."
+              value={formik.values.image}
+              onChange={formik.handleChange}
+              className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-amber-500 focus:bg-white text-slate-900 transition-colors"
+            />
+            {formik.values.image && (
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <img
+                  src={formik.values.image}
+                  alt="Preview"
+                  className="w-16 h-16 rounded-lg object-cover bg-white"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+                <span className="text-[11px] font-semibold text-slate-500">
+                  Image Preview verified
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Action buttons */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => navigate("/salon-dashboard/services")}
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
             >
-              {formik.isSubmitting ? "Creating..." : "Create service"}
-            </Button>
-            {!loadingCategories && categories.length === 0 && <p className="pt-2 text-sm text-gray-600">Create a category before adding services.</p>}
-          </Grid>
-        </Grid>
-      </form>
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={submitting || !formik.values.name || !formik.values.price || !formik.values.category}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-transform active:scale-95 shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              <CheckCircleOutlined sx={{ fontSize: 16 }} className="text-amber-400" />
+              <span>{submitting ? "Publishing Service..." : "Publish Service"}</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

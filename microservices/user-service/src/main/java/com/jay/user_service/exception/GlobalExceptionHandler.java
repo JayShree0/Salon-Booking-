@@ -3,6 +3,7 @@ package com.jay.user_service.exception;
 import com.jay.user_service.payload.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -58,6 +59,19 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 request
         );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(
+            IllegalArgumentException ex, WebRequest request) {
+        return buildResponse(ex.getMessage(), List.of(ex.getMessage()), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(
+            BadCredentialsException ex, WebRequest request) {
+        return buildResponse("Invalid email or password", List.of("Invalid email or password"),
+                HttpStatus.UNAUTHORIZED, request);
     }
 
     //  Validation Error

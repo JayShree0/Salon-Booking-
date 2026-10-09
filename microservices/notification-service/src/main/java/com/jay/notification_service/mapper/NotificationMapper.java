@@ -16,6 +16,11 @@ public class NotificationMapper {
         dto.setIsRead(notification.getIsRead());
         dto.setUserId(notification.getUserId());
         dto.setBookingId(bookingDTO.getId());
+
+        // CHANGED: The frontend notification card shows the booking status
+        // and the start time, so the booking is now part of the response.
+        dto.setBooking(bookingDTO);
+
         dto.setSalonId(notification.getSalonId());
         dto.setCreatedAt(notification.getCreatedAt());
         return dto;

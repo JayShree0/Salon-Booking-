@@ -28,4 +28,7 @@ public interface ServiceOfferingService {
     // get the service by ID
     ServiceOffering getServiceById(Long id) throws Exception;
 
+    // Delete an existing service, verifying it belongs to the given salon
+    void deleteService(Long serviceId, Long salonId) throws Exception;
+
 }

@@ -48,7 +48,7 @@ public class ReviewController {
     @GetMapping("/salon/{salonId}")
     public ResponseEntity<List<Review>> getReviewsBySalonId(
             @PathVariable Long salonId,
-            @RequestHeader("Authorization") String jwt
+            @RequestHeader(value = "Authorization", required = false) String jwt
     ) throws Exception {
 
         // Makes an inter-service call to SALON-SERVICE via Feign to verify the salon exists before fetching reviews

@@ -12,8 +12,10 @@ import com.jay.booking_service.service.client.SalonFeignClient;
 import com.jay.booking_service.service.client.ServiceOfferingFeignClient;
 import com.jay.booking_service.service.client.UserFeignClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -42,21 +44,30 @@ public class BookingController {
             @RequestHeader("Authorization") String jwt
     ) throws Exception {
         UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
+        if (user == null || user.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User authentication required.");
+        }
 
+        if (user.getRole() == null || !"CUSTOMER".equalsIgnoreCase(user.getRole())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only customers are permitted to create bookings. Salon owners cannot create customer bookings."
+            );
+        }
 
         SalonDTO salon = salonFeignClient.getSalonById(salonId).getBody();
 
         Set<ServiceDTO> serviceDTOSet = serviceOfferingFeignClient.getServiceByIds(bookingRequest.getServiceIds()).getBody();
+
+        if (serviceDTOSet == null || serviceDTOSet.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No services selected for booking.");
+        }
 
         Booking booking = bookingService.createBooking(
                 bookingRequest,
                 user,
                 salon,
                 serviceDTOSet);
-
-        if(serviceDTOSet.isEmpty()) {
-            throw new Exception("service not found ...");
-        }
 
         BookingDTO bookingDTO = BookingMapper.toDTO(booking);
 
@@ -75,7 +86,10 @@ public class BookingController {
 
         UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
         if (user == null || user.getId() == null) {
-            throw new Exception("user not found from jwt....");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User authentication required.");
+        }
+        if (user.getRole() == null || !"CUSTOMER".equalsIgnoreCase(user.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only customers can access customer bookings.");
         }
         List<Booking> bookings = bookingService.getBookingByCustomer(user.getId());
         return ResponseEntity.ok(getBookingDTOs(bookings));
@@ -87,24 +101,75 @@ public class BookingController {
     ) throws Exception {
 
         SalonDTO salonDTO = salonFeignClient.getSalonByOwnerId(jwt).getBody();
-        List<Booking> bookings = bookingService.getBookingsBySalon(salonDTO.getId()); // Mocked salon ID, replace with actual salon ID
+        List<Booking> bookings = bookingService.getBookingsBySalon(salonDTO.getId());
 
         return ResponseEntity.ok(getBookingDTOs(bookings));
     }
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<BookingDTO> getBookingsById(
-            @PathVariable("bookingId") Long bookingId
+            @PathVariable("bookingId") Long bookingId,
+            @RequestHeader(value = "Authorization", required = false) String jwt
     ) throws Exception {
-        Booking bookings = bookingService.getBookingById(bookingId);
-        return ResponseEntity.ok(BookingMapper.toDTO(bookings));
+        Booking booking = bookingService.getBookingById(bookingId);
+        if (jwt != null && !jwt.isBlank()) {
+            try {
+                UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
+                if (user != null && user.getId() != null) {
+                    boolean isCustomer = "CUSTOMER".equalsIgnoreCase(user.getRole()) && user.getId().equals(booking.getCustomerId());
+                    boolean isOwner = false;
+                    if ("SALON_OWNER".equalsIgnoreCase(user.getRole())) {
+                        try {
+                            SalonDTO ownerSalon = salonFeignClient.getSalonByOwnerId(jwt).getBody();
+                            if (ownerSalon != null && ownerSalon.getId().equals(booking.getSalonId())) {
+                                isOwner = true;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                    boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+
+                    if (!isCustomer && !isOwner && !isAdmin) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to this booking record.");
+                    }
+                }
+            } catch (ResponseStatusException rse) {
+                throw rse;
+            } catch (Exception ignored) {}
+        }
+        return ResponseEntity.ok(BookingMapper.toDTO(booking));
     }
 
     @PutMapping("/{bookingId}/status")
     public ResponseEntity<BookingDTO> updateBookingStatus(
             @PathVariable Long bookingId,
-            @RequestParam BookingStatus status
+            @RequestParam BookingStatus status,
+            @RequestHeader(value = "Authorization", required = false) String jwt
     ) throws Exception {
+        if (jwt != null && !jwt.isBlank()) {
+            UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
+            if (user != null && user.getId() != null) {
+                Booking booking = bookingService.getBookingById(bookingId);
+                boolean isCustomer = "CUSTOMER".equalsIgnoreCase(user.getRole()) && user.getId().equals(booking.getCustomerId());
+                boolean isOwner = false;
+                if ("SALON_OWNER".equalsIgnoreCase(user.getRole())) {
+                    try {
+                        SalonDTO ownerSalon = salonFeignClient.getSalonByOwnerId(jwt).getBody();
+                        if (ownerSalon != null && ownerSalon.getId().equals(booking.getSalonId())) {
+                            isOwner = true;
+                        }
+                    } catch (Exception ignored) {}
+                }
+                boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+
+                if (isCustomer) {
+                    if (status != BookingStatus.CANCELLED) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Customers are only permitted to cancel their own bookings.");
+                    }
+                } else if (!isOwner && !isAdmin) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to update booking status for this salon.");
+                }
+            }
+        }
         Booking bookings = bookingService.updateBookingStatus(bookingId, status);
 
         return ResponseEntity.ok(BookingMapper.toDTO(bookings));

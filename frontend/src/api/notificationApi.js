@@ -1,8 +1,9 @@
 import api from "../config/api";
 
 export const notificationApi = {
-  getUserNotifications: async () => {
-    const response = await api.get("/api/notifications/user");
+  getUserNotifications: async (userId) => {
+    // Backend: GET /api/notifications/user/{userId}
+    const response = await api.get(`/api/notifications/user/${userId}`);
     return response.data || [];
   },
 
@@ -11,9 +12,10 @@ export const notificationApi = {
     return response.data;
   },
 
-  markAllAsRead: async () => {
-    const response = await api.put("/api/notifications/user/read-all");
-    return response.data;
+  getUnreadCount: async () => {
+    // Backend: GET /api/notifications/unread-count (JWT-based, no userId param needed)
+    const response = await api.get("/api/notifications/unread-count");
+    return typeof response.data === "number" ? response.data : 0;
   },
 };
 

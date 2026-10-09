@@ -4,6 +4,8 @@ spring:
 
   cloud:
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
       discovery:
         locator:
           enabled: true
@@ -39,17 +41,19 @@ spring:
           predicates:
             - Path=/api/service-offering/**
 
+        # ADDED: Route frontend review requests to the existing review service.
+        - id: review-service
+          uri: lb://REVIEW-SERVICE
+          predicates:
+            - Path=/api/reviews/**
+
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/auth/**,/api/admin/users/**,/api/users/**,/users/**
+            - Path=/auth/**,/api/auth/**,/api/admin/users/**,/api/users/**,/users/**
 
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: "http://localhost:8080/realms/master/protocol/openid-connect/certs"
+jwt:
+  secret: ${JWT_SECRET:SalonBookingSecretKeyForJwtTokenSigningAndValidation2026WithMinimum256BitsLength}
 
 
 server:

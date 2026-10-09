@@ -5,8 +5,10 @@ import com.jay.notification_service.mapper.NotificationMapper;
 import com.jay.notification_service.model.Notification;
 import com.jay.notification_service.payload.dto.BookingDTO;
 import com.jay.notification_service.payload.dto.NotificationDTO;
+import com.jay.notification_service.payload.dto.UserDTO;
 import com.jay.notification_service.service.NotificationService;
 import com.jay.notification_service.service.client.BookingFeignClient;
+import com.jay.notification_service.service.client.UserFeignClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class NotificationController {
 
     public final NotificationService notificationService;
     public final BookingFeignClient bookingFeignClient;
+    public final UserFeignClient userFeignClient;
 
     @PostMapping
     public ResponseEntity<NotificationDTO> createNotification(
@@ -60,6 +63,20 @@ public class NotificationController {
                 notification1.getBookingId()).getBody();
         return ResponseEntity.ok(NotificationMapper.toDTO(notification1, bookingDTO));
 
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Long> getUnreadCount(
+            @RequestHeader("Authorization") String jwt) throws Exception {
+        UserDTO user = userFeignClient.getUserProfile(jwt).getBody();
+        if (user == null) {
+            throw new Exception("User not found from jwt");
+        }
+        long count = notificationService.getAllNotificationsByUserId(user.getId())
+                .stream()
+                .filter(n -> Boolean.FALSE.equals(n.getIsRead()))
+                .count();
+        return ResponseEntity.ok(count);
     }
 
 

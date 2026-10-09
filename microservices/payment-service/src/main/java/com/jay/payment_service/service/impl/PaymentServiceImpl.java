@@ -24,6 +24,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
@@ -42,6 +44,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Value("${razorpay.api.secret}")
     private String razorpayApiSecret;
+
+    @Value("${frontend.base-url:http://localhost:5170}")
+    private String frontendBaseUrl;
 
     public void validateRazorpayConfiguration() {
         boolean missingKey = razorpayApiKey == null || razorpayApiKey.isBlank() || razorpayApiKey.contains("your_");
@@ -90,12 +95,15 @@ public class PaymentServiceImpl implements PaymentService {
             paymentOrderRepository.save(savedOrder);
 
         } else {
-            String paymentUrl = createStripePaymentLink(
+            Session session = createStripePaymentLink(
                     user,
                     savedOrder.getAmount(),
                     savedOrder.getId());
 
-            paymentLinkResponse.setPayment_link_url(paymentUrl);
+            paymentLinkResponse.setPayment_link_url(session.getUrl());
+            paymentLinkResponse.setGetPayment_link_id(session.getId());
+            savedOrder.setPaymentLinkId(session.getId());
+            paymentOrderRepository.save(savedOrder);
         }
 
         return paymentLinkResponse;
@@ -111,6 +119,11 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         return paymentOrder;
+    }
+
+    @Override
+    public List<PaymentOrder> getPaymentOrdersBySalonId(Long salonId) {
+        return paymentOrderRepository.findAllBySalonId(salonId);
     }
 
     @Override
@@ -145,7 +158,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             paymentLinkRequest.put("reminder_enable", true);
             // replace with actual callback URL and method after testing [ development URL]
-            paymentLinkRequest.put("callback_url", "http://localhost.com/3000/payment-success/" + orderId);
+            paymentLinkRequest.put("callback_url", frontendBaseUrl + "/payment-success/" + orderId);
             paymentLinkRequest.put("callback_method", "get");
             paymentLinkRequest.put("description", "Payment for booking ID: " + orderId);
 
@@ -157,7 +170,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public String createStripePaymentLink(UserDTO user, Long amount, Long orderId) throws StripeException {
+    public Session createStripePaymentLink(UserDTO user, Long amount, Long orderId) throws StripeException {
 
 
         Stripe.apiKey = stripeSecretKey;
@@ -166,15 +179,15 @@ public class PaymentServiceImpl implements PaymentService {
                 .builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:3000/payment-success/" + orderId)
-                .setCancelUrl("http://localhost:3000/payment/cancel")
+                .setSuccessUrl(frontendBaseUrl + "/payment-success/" + orderId + "?paymentMethod=STRIPE&session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(frontendBaseUrl + "/payment/cancel")
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
                                 .setQuantity(1L)
                                 .setPriceData(
                                         SessionCreateParams.LineItem.PriceData.builder()
-                                                .setCurrency("usd")
-                                                .setUnitAmount(amount * 100) // Convert to cents
+                                                .setCurrency("inr")
+                                                .setUnitAmount(amount * 100)
                                                 .setProductData(
                                                         SessionCreateParams.LineItem.PriceData.ProductData.builder()
                                                                 .setName("Salon appointment booking")
@@ -186,9 +199,7 @@ public class PaymentServiceImpl implements PaymentService {
                 )
                 .build();
 
-        Session session = Session.create(params);
-
-        return session.getUrl();
+        return Session.create(params);
     }
 
     @Override
@@ -222,11 +233,18 @@ public class PaymentServiceImpl implements PaymentService {
                 return false;
             }
             else{
-                // For Stripe, you would typically verify the payment using webhooks.
-                // This is a placeholder for processing Stripe payments.
-                // You would need to implement webhook handling to update the payment status based on Stripe's events.
+                Stripe.apiKey = stripeSecretKey;
+                Session session = Session.retrieve(paymentId);
+                if (!"paid".equals(session.getPaymentStatus())) {
+                    return false;
+                }
 
-                // For now, we will assume the payment is successful for demonstration purposes.
+                bookingEventProducer.sendBookingUpdatedEvent(paymentOrder);
+                notificationEventProducer.sentNotification(
+                        paymentOrder.getBookingId(),
+                        paymentOrder.getUserId(),
+                        paymentOrder.getSalonId()
+                );
                 paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
                 paymentOrderRepository.save(paymentOrder);
                 return true;

@@ -18,8 +18,8 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import api from "../../config/api";
+import { authApi } from "../../api/authApi";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -172,10 +172,8 @@ const Profile = () => {
     }
   };
 
-  const handleSignOut = () => {
-    localStorage.removeItem("jwt");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("role");
+  const handleSignOut = async () => {
+    await authApi.logout();
     navigate("/");
   };
 
@@ -688,7 +686,7 @@ const Profile = () => {
               <div className="flex items-center justify-between py-1">
                 <span className="text-slate-600 font-medium">Authentication</span>
                 <span className="text-emerald-700 font-bold text-xs bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Keycloak SSO Protected
+                  Spring Security JWT Protected
                 </span>
               </div>
 

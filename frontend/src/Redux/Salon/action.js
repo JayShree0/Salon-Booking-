@@ -51,12 +51,7 @@ export const fetchSalons = () => async (dispatch) => {
     })
 
     try {
-        const jwt = localStorage.getItem("jwt");
-        const headers = (jwt && jwt !== "null" && jwt !== "undefined")
-            ? { Authorization: `Bearer ${jwt}` }
-            : {};
-
-        const response = await api.get(API_BASE_URL, { headers });
+        const response = await api.get(API_BASE_URL);
 
         dispatch({ type: FETCH_SALONS_SUCCESS, payload: response.data })
     }
@@ -72,12 +67,7 @@ export const fetchSalonById = (salonId) => async (dispatch) => {
     })
 
     try {
-
-        const response = await api.get(`${API_BASE_URL}/${salonId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("jwt")}`
-            }
-        })
+        const response = await api.get(`${API_BASE_URL}/${salonId}`);
 
         dispatch({ type: FETCH_SALON_BY_ID_SUCCESS, payload: response.data })
     }
@@ -93,12 +83,12 @@ export const fetchSalonByOwner = (jwt) => async (dispatch) => {
     })
 
     try {
+        const token = jwt || localStorage.getItem("jwt");
+        const headers = (token && token !== "null" && token !== "undefined")
+            ? { Authorization: `Bearer ${token}` }
+            : {};
 
-        const response = await api.get(`${API_BASE_URL}/owner`, {
-            headers: {
-                Authorization: `Bearer ${jwt}`
-            }
-        })
+        const response = await api.get(`${API_BASE_URL}/owner`, { headers });
 
         dispatch({ type: FETCH_SALON_BY_OWNER_SUCCESS, payload: response.data })
     }
@@ -115,13 +105,7 @@ export const searchSalons = (jwt, city) => async (dispatch) => {
     })
 
     try {
-        const token = jwt || localStorage.getItem("jwt");
-        const headers = (token && token !== "null" && token !== "undefined")
-            ? { Authorization: `Bearer ${token}` }
-            : {};
-
         const response = await api.get(`${API_BASE_URL}/search`, {
-            headers,
             params: {
                 city: city
             }

@@ -38,6 +38,8 @@ const Navbar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const isMenuOpen = Boolean(anchorEl);
+  const userRole = user?.role || localStorage.getItem("role");
+  const isSalonOwner = userRole === "SALON_OWNER" || userRole === "ROLE_SALON_OWNER";
 
   // 1. Fetch current user profile if JWT exists
   useEffect(() => {
@@ -76,7 +78,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleCustomAuth = (e) => {
       const mode = e.detail?.mode || "login";
-      const selectedRole = e.detail?.role || "CUSTOMER";
+      const selectedRole = e.detail?.role || null;
       openAuth(mode, selectedRole);
     };
 
@@ -92,7 +94,7 @@ const Navbar = () => {
     setAnchorEl(null);
   };
 
-  const openAuth = (mode = "login", selectedRole = "CUSTOMER") => {
+  const openAuth = (mode = "login", selectedRole = null) => {
     setAuthMode(mode);
     setRole(selectedRole);
     setAuthOpen(true);
@@ -163,7 +165,7 @@ const Navbar = () => {
           {/* Right: Action Tray (Unified 40px Height Axis for Flawless Alignment) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Salon Owner Dashboard or Partner CTA */}
-            {user?.role === "SALON_OWNER" ? (
+            {isSalonOwner ? (
               <button
                 type="button"
                 onClick={() => navigate("/salon-dashboard")}
@@ -276,7 +278,7 @@ const Navbar = () => {
                     <p className="text-xs text-slate-500 truncate leading-none">{user.email}</p>
                     <div className="pt-0.5">
                       <span className="inline-block text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                        {user.role === "SALON_OWNER" ? "Salon Partner" : "Client"}
+                        {isSalonOwner ? "Salon Partner" : "Client"}
                       </span>
                     </div>
                   </div>
@@ -382,7 +384,7 @@ const Navbar = () => {
                   </MenuItem>
 
                   {/* 4. Role-based: Salon Dashboard */}
-                  {user.role === "SALON_OWNER" && (
+                  {isSalonOwner && (
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
@@ -522,7 +524,7 @@ const Navbar = () => {
                   {user.fullName || user.username}
                 </p>
                 <p className="text-[11px] text-amber-700 font-semibold capitalize leading-none mt-0.5">
-                  {user.role === "SALON_OWNER" ? "Salon Partner" : "Client"}
+                  {isSalonOwner ? "Salon Partner" : "Client"}
                 </p>
               </div>
             </div>
@@ -561,7 +563,7 @@ const Navbar = () => {
                     { label: "My Profile", path: "/profile", icon: <PersonOutlinedIcon fontSize="small" /> },
                   ]
                 : []),
-              ...(user?.role === "SALON_OWNER"
+              ...(isSalonOwner
                 ? [{ label: "Salon Dashboard", path: "/salon-dashboard", icon: <DashboardOutlinedIcon fontSize="small" /> }]
                 : []),
             ].map((item) => (
@@ -589,7 +591,7 @@ const Navbar = () => {
 
         {/* Drawer Bottom Actions */}
         <div className="pt-4 border-t border-slate-100 space-y-2">
-          {user?.role !== "SALON_OWNER" && (
+          {!isSalonOwner && (
             <button
               type="button"
               onClick={() => {

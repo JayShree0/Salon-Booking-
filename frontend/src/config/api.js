@@ -8,10 +8,40 @@ const api = axios.create({
 
 api.defaults.headers.post["Content-Type"] = "application/json";
 
+const isPublicEndpoint = (method, url) => {
+    if (!url) return false;
+    const cleanUrl = url.split("?")[0];
+    const upperMethod = (method || "GET").toUpperCase();
+
+    if (cleanUrl.startsWith("/auth/") || cleanUrl.startsWith("/api/notifications/ws")) {
+        return true;
+    }
+
+    if (upperMethod === "GET") {
+        if (cleanUrl.startsWith("/api/salons/owner")) {
+            return false;
+        }
+        if (cleanUrl.includes("salon-owner")) {
+            return false;
+        }
+        if (cleanUrl === "/api/salons" || cleanUrl.startsWith("/api/salons/") || cleanUrl.startsWith("/salons")) {
+            return true;
+        }
+        if (cleanUrl.startsWith("/api/categories") || cleanUrl.startsWith("/api/service-offering")) {
+            return true;
+        }
+        if (cleanUrl.startsWith("/api/bookings/slots") || cleanUrl.startsWith("/api/reviews")) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
 api.interceptors.request.use((config) => {
     const jwt = localStorage.getItem("jwt");
 
-    if (jwt) {
+    if (jwt && jwt !== "null" && jwt !== "undefined" && !isPublicEndpoint(config.method, config.url)) {
         config.headers.Authorization = `Bearer ${jwt}`;
     }
 

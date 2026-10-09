@@ -48,6 +48,14 @@ public class ServiceOfferingImpl implements ServiceOfferingService {
         serviceOffering.setPrice(service.getPrice());
         serviceOffering.setDuration(service.getDuration());
 
+        // CHANGED: The frontend edit dialog sends the categoryId of the service,
+        // but it was ignored before, so the new category was never saved.
+        // We update it only when the request contains a category.
+        if (service.getCategoryId() != null) {
+            serviceOffering.setCategoryId(service.getCategoryId());
+        }
+
+
         return serviceOfferingRepository.save(serviceOffering);
     }
 
@@ -87,6 +95,19 @@ public class ServiceOfferingImpl implements ServiceOfferingService {
             throw new Exception("Service not exists with id " + id);
         }
         return serviceOffering;
+    }
+
+    @Override
+    public void deleteService(Long serviceId, Long salonId) throws Exception {
+        ServiceOffering serviceOffering = serviceOfferingRepository.findById(serviceId).orElse(null);
+        if (serviceOffering == null) {
+            throw new Exception("Service not found with id " + serviceId);
+        }
+        // Ownership check: ensure the service belongs to the authenticated owner's salon
+        if (!serviceOffering.getSalonId().equals(salonId)) {
+            throw new Exception("You do not have permission to delete this service");
+        }
+        serviceOfferingRepository.deleteById(serviceId);
     }
 
 }

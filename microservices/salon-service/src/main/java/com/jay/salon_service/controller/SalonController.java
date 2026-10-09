@@ -105,6 +105,13 @@ public class SalonController {
         }
         Salon salon = salonService.getSalonByOwnerId(userDTO.getId());
 
+
+        // CHANGED: A new salon owner has no salon yet, so we answer with 404
+        // instead of failing inside the mapper with a NullPointerException (500).
+        if (salon == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         SalonDTO salonDTO = SalonMapper.mapToDto(salon);
 
         return ResponseEntity.ok(salonDTO);
@@ -126,7 +133,13 @@ public class SalonController {
     // delete salon by id
     @DeleteMapping("/{salonId}")
     public ResponseEntity<String> deleteSalon(
-            @PathVariable Long salonId) throws Exception {
+            @PathVariable Long salonId,
+            @RequestHeader("Authorization") String jwt) throws Exception {
+        UserDTO userDTO = userFeignClient.getUserProfile(jwt).getBody();
+        Salon salon = salonService.getSalonById(salonId);
+        if (!salon.getOwnerId().equals(userDTO.getId())) {
+            return ResponseEntity.status(403).body("You do not have permission to delete this salon");
+        }
         salonService.deleteSalon(salonId);
         return ResponseEntity.ok("Salon deleted successfully");
     }

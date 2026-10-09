@@ -29,25 +29,62 @@ const AuthModal = ({ open, onClose, initialMode = "login", initialRole = null })
     }
   };
 
+  // Compute dialog width based on active view
+  const getDialogMaxWidth = () => {
+    if (view === "signup_owner" || view === "roles") return "md";
+    return "sm";
+  };
+
   return (
     <Dialog
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth={view === "signup_owner" ? "sm" : "xs"}
+      maxWidth={getDialogMaxWidth()}
+      slotProps={{
+        backdrop: {
+          sx: {
+            backdropFilter: "blur(6px)",
+            backgroundColor: "rgba(15, 23, 42, 0.45)",
+          },
+        },
+      }}
       PaperProps={{
         sx: {
-          borderRadius: 4,
-          padding: 2,
+          borderRadius: { xs: "20px", sm: "24px" },
+          padding: { xs: 2, sm: 3 },
+          position: "relative",
+          boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8)",
+          backgroundImage: "none",
+          maxHeight: "92vh",
         },
       }}
     >
-      <div className="flex justify-end">
-        <IconButton size="small" onClick={onClose} aria-label="close">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </div>
-      <DialogContent sx={{ pt: 0 }}>
+      {/* Floating Modern Close Button */}
+      <IconButton
+        size="small"
+        onClick={onClose}
+        aria-label="close authentication modal"
+        sx={{
+          position: "absolute",
+          top: { xs: 12, sm: 16 },
+          right: { xs: 12, sm: 16 },
+          zIndex: 20,
+          bgcolor: "#F8FAFC",
+          color: "#64748B",
+          border: "1px solid #E2E8F0",
+          transition: "all 0.2s ease",
+          "&:hover": {
+            bgcolor: "#F1F5F9",
+            color: "#0F172A",
+            transform: "scale(1.05)",
+          },
+        }}
+      >
+        <CloseIcon sx={{ fontSize: 18 }} />
+      </IconButton>
+
+      <DialogContent sx={{ p: { xs: 1, sm: 1.5 }, pt: 0, overflowY: "auto" }}>
         {view === "login" && (
           <LoginForm
             onSuccess={onClose}
@@ -58,6 +95,7 @@ const AuthModal = ({ open, onClose, initialMode = "login", initialRole = null })
         {view === "roles" && (
           <RoleSelectionCard
             onSelectRole={handleSelectRole}
+            onSwitchToLogin={() => setView("login")}
           />
         )}
 

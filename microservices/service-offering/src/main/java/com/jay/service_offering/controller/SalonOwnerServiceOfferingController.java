@@ -61,4 +61,15 @@ public class SalonOwnerServiceOfferingController {
 
         return ResponseEntity.ok(serviceOfferings);
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteService(
+            @PathVariable("id") Long serviceId,
+            @RequestHeader("Authorization") String jwt) throws Exception {
+
+        SalonDTO salonDTO = salonFeignClient.getSalonByOwnerId(jwt).getBody();
+
+        serviceOfferingService.deleteService(serviceId, salonDTO.getId());
+
+        return ResponseEntity.ok("Service deleted successfully");
+    }
 }

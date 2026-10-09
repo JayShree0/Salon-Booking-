@@ -10,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 //@RequestMapping("/api/users")
@@ -20,6 +21,7 @@ public class UserController {
 
     //  Create User
     @PostMapping("/api/users")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> createUser(
             @Valid @RequestBody UserRequestDto request) {
 
@@ -28,27 +30,39 @@ public class UserController {
     }
 
     @GetMapping("/api/users/profile")
-    public ResponseEntity<User> getUserProfile(
+    public ResponseEntity<UserResponseDto> getUserProfile(
             @RequestHeader("Authorization") String jwt) throws Exception {
 
         User user = userService.getUserFromJwt(jwt);
-        return ResponseEntity.ok(user);
+        UserResponseDto response = new UserResponseDto();
+        response.setId(user.getId());
+        response.setFullName(user.getFullName());
+        response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
+        response.setUsername(user.getUsername());
+        response.setRole(user.getRole());
+        response.setCreatedAt(user.getCreatedAt());
+        response.setUpdatedAt(user.getUpdatedAt());
+        return ResponseEntity.ok(response);
     }
 
     //  Get All Users
     @GetMapping("/api/users")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> getUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
     //  Get User By ID
     @GetMapping("/api/users/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or @userServiceImp.isCurrentUser(#p0)")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable("userId") Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     //  Update User
     @PutMapping("/api/users/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @userServiceImp.isCurrentUser(#p1)")
     public ResponseEntity<UserResponseDto> updateUser(
             @Valid @RequestBody UserRequestDto request,
             @PathVariable Long id) {
@@ -58,6 +72,7 @@ public class UserController {
 
     //  Delete User
     @DeleteMapping("/api/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();

@@ -93,7 +93,7 @@ services:
     image: mysql
     container_name: service-offeringdb
     ports:
-      - "3006:3006"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: service_db
@@ -105,6 +105,58 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  notificationdb:
+    image: mysql
+    container_name: notificationdb
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notification_db
+    networks:
+      - jaydevhub
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  reviewdb:
+    image: mysql
+    container_name: reviewdb
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: review_db
+    networks:
+      - jaydevhub
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ================= MESSAGING =================
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - jaydevhub
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
 
   # ================= EUREKA =================
 
@@ -137,6 +189,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://userdb:3306/user_db
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      JWT_SECRET: ${JWT_SECRET:-SalonBookingSecretKeyForJwtTokenSigningAndValidation2026WithMinimum256BitsLength}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent user:5001/actuator/health | grep UP || exit 1"]
@@ -158,6 +211,8 @@ services:
     depends_on:
       bookingdb:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       eurekaserver:
         condition: service_healthy
     environment:
@@ -165,6 +220,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://bookingdb:3306/booking_db
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "curl --fail --silent booking:5005/actuator/health | grep UP || exit 1" ]
@@ -208,6 +264,8 @@ services:
     depends_on:
       paymentdb:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       eurekaserver:
         condition: service_healthy
     environment:
@@ -215,6 +273,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://paymentdb:3306/payment_db
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "curl --fail --silent payment:5006/actuator/health | grep UP || exit 1" ]
@@ -285,12 +344,55 @@ services:
       - jaydevhub
     environment:
       SPRING_APPLICATION_NAME: "gateway-server"
+      JWT_SECRET: ${JWT_SECRET:-SalonBookingSecretKeyForJwtTokenSigningAndValidation2026WithMinimum256BitsLength}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "curl --fail --silent gatewayserver:5000/actuator/health | grep UP || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
+
+
+  notification:
+    image: jaydevhub/salon-notification:v1
+    container_name: notification
+    ports:
+      - "5007:5007"
+    networks:
+      - jaydevhub
+    depends_on:
+      notificationdb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "notification-service"
+      SPRING_DATASOURCE_URL: jdbc:mysql://notificationdb:3306/notification_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+
+  review:
+    image: jaydevhub/salon-review:v1
+    container_name: review
+    ports:
+      - "5008:5008"
+    networks:
+      - jaydevhub
+    depends_on:
+      reviewdb:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "review-service"
+      SPRING_DATASOURCE_URL: jdbc:mysql://reviewdb:3306/review_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
 
 networks:
   jaydevhub:

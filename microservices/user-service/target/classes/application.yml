@@ -24,3 +24,6 @@ eureka:
     register-with-eureka: true
     service-url:
       defaultZone: "http://localhost:8070/eureka/"
+
+jwt:
+  secret: ${JWT_SECRET:SalonBookingSecretKeyForJwtTokenSigningAndValidation2026WithMinimum256BitsLength}
