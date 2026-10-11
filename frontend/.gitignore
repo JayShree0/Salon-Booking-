@@ -1,19 +1,48 @@
+# Dependencies
 node_modules/
-dist/
-.vite/
+/.pnp
+.pnp.js
 
-# Local environment files
+# Production build outputs
+dist/
+dist-ssr/
+build/
+
+# Vite and tooling caches
+.vite/
+.tsupgrader/
+.eslintcache
+*.tsbuildinfo
+
+# Test and Coverage
+coverage/
+.nyc_output/
+
+# Local environment and secret files
 .env
 .env.*
 !.env.example
+*.pem
+*.ppk
 
 # Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# OS and editor files
+# OS and Editor files
 .DS_Store
 Thumbs.db
 .idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.sw?
+
+# Whitelist essential frontend configuration files
+!package.json
+!package-lock.json
+!vite.config.js
+!index.html
