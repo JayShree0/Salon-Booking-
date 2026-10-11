@@ -8,6 +8,8 @@ const PaymentResult = ({ cancelled = false }) => {
   const [status, setStatus] = useState(cancelled ? "cancelled" : "checking");
   const [message, setMessage] = useState(cancelled ? "You left the payment page before completing payment." : "Confirming your payment...");
 
+  const [bookingId, setBookingId] = useState(null);
+
   useEffect(() => {
     if (cancelled) return;
 
@@ -39,6 +41,17 @@ const PaymentResult = ({ cancelled = false }) => {
         if (data === true) {
           setStatus("success");
           setMessage("Your payment is confirmed and your booking is being finalized.");
+
+          if (orderId) {
+            try {
+              const orderRes = await api.get(`/api/payments/${orderId}`);
+              if (orderRes.data?.bookingId) {
+                setBookingId(orderRes.data.bookingId);
+              }
+            } catch (err) {
+              console.warn("Could not retrieve booking ID for payment order:", err);
+            }
+          }
         } else {
           setStatus("failed");
           setMessage("Payment is not confirmed yet. Check your bookings before placing another request.");
@@ -50,7 +63,7 @@ const PaymentResult = ({ cancelled = false }) => {
     };
 
     confirmPayment();
-  }, [cancelled, searchParams]);
+  }, [cancelled, searchParams, orderId]);
 
   return (
     <main className="min-h-[65vh] flex flex-col items-center justify-center text-center px-5">
@@ -62,7 +75,22 @@ const PaymentResult = ({ cancelled = false }) => {
       </h1>
       <p className="mt-3 max-w-lg text-gray-600">{message}</p>
       {orderId && <p className="mt-2 text-sm text-gray-500">Payment order #{orderId}</p>}
-      <Link to="/bookings" className="mt-6 rounded bg-green-800 px-5 py-3 text-white">View my bookings</Link>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        {bookingId && (
+          <Link
+            to={`/booking-confirmation/${bookingId}`}
+            className="rounded bg-amber-600 px-5 py-3 font-medium text-white shadow transition-colors hover:bg-amber-700"
+          >
+            View Booking Details
+          </Link>
+        )}
+        <Link
+          to="/bookings"
+          className={`rounded px-5 py-3 font-medium text-white transition-colors ${bookingId ? "bg-stone-800 hover:bg-stone-900" : "bg-green-800 hover:bg-green-900"}`}
+        >
+          View My Bookings
+        </Link>
+      </div>
     </main>
   );
 };
