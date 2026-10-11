@@ -191,12 +191,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       JWT_SECRET: ${JWT_SECRET:-SalonBookingSecretKeyForJwtTokenSigningAndValidation2026WithMinimum256BitsLength}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-    healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent user:5001/actuator/health | grep UP || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
     depends_on:
       userdb:
         condition: service_healthy
@@ -222,12 +216,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent booking:5005/actuator/health | grep UP || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
 
   category:
     image: jaydevhub/salon-category:v1
@@ -247,12 +235,6 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent category:5003/actuator/health | grep UP || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
 
   payment:
     image: jaydevhub/salon-payment:v1
@@ -275,12 +257,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_RABBITMQ_HOST: rabbitmq
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent payment:5006/actuator/health | grep UP || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
 
   salon:
     image: jaydevhub/salon-service:v1
@@ -300,12 +276,6 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent salon:5002/actuator/health | grep UP || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
 
   service-offering:
     image: jaydevhub/salon-service-offering:v1
@@ -325,12 +295,6 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent service-offering:5004/actuator/health | grep UP || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
 
   gatewayserver:
     image: jaydevhub/salon-gatewayserver:v1
@@ -346,11 +310,6 @@ services:
       SPRING_APPLICATION_NAME: "gateway-server"
       JWT_SECRET: ${JWT_SECRET:-SalonBookingSecretKeyForJwtTokenSigningAndValidation2026WithMinimum256BitsLength}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent gatewayserver:5000/actuator/health | grep UP || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
 
   notification:
