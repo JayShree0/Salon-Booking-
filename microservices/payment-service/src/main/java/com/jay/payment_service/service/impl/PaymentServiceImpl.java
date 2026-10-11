@@ -167,8 +167,12 @@ public class PaymentServiceImpl implements PaymentService {
             paymentLinkRequest.put("currency", "INR");
 
             JSONObject customer = new JSONObject();
-            customer.put("name", user.getFullName());
-            customer.put("email", user.getEmail());
+            String customerName = user.getFullName();
+            if (customerName == null || customerName.isBlank()) {
+                customerName = (user.getUsername() != null && !user.getUsername().isBlank()) ? user.getUsername() : "Customer";
+            }
+            customer.put("name", customerName);
+            customer.put("email", user.getEmail() != null ? user.getEmail() : "customer@example.com");
             paymentLinkRequest.put("customer", customer);
 
             JSONObject notify = new JSONObject();

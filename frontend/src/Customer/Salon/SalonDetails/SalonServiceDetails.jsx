@@ -207,8 +207,8 @@ const SalonServiceDetails = ({ salon: propSalon }) => {
 
       if (data?.payment_link_url) {
         window.location.assign(data.payment_link_url);
-      } else if (data?.bookingId) {
-        navigate(`/booking-confirmation/${data.bookingId}`);
+      } else if (data?.bookingId || data?.id) {
+        navigate(`/booking-confirmation/${data.bookingId || data.id}`);
       } else {
         navigate("/bookings");
       }
