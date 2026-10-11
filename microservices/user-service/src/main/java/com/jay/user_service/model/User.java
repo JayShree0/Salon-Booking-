@@ -31,6 +31,7 @@ public class User {
     @NotBlank(message = "username is mandatory")
     private String username;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
 

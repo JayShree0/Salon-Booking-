@@ -6,9 +6,9 @@
 USE user_db;
 INSERT INTO user (id, full_name, email, phone, username, password, role, created_at, updated_at)
 VALUES 
-(1, 'The Grooming Co. Owner', 'owner@salonbook.com', '9876543210', 'grooming_owner', 'password123', 2, NOW(), NOW()),
-(2, 'Rahul Verma', 'customer@salonbook.com', '9812345678', 'rahul_customer', 'password123', 0, NOW(), NOW())
-ON DUPLICATE KEY UPDATE full_name=VALUES(full_name), password=VALUES(password);
+(1, 'The Grooming Co. Owner', 'owner@salonbook.com', '9876543210', 'grooming_owner', 'password123', 'SALON_OWNER', NOW(), NOW()),
+(2, 'Rahul Verma', 'customer@salonbook.com', '9812345678', 'rahul_customer', 'password123', 'CUSTOMER', NOW(), NOW())
+ON DUPLICATE KEY UPDATE full_name=VALUES(full_name), password=VALUES(password), role=VALUES(role);
 
 -- 2. SALON SERVICE (salon_db)
 USE salon_db;
