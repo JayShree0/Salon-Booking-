@@ -11,6 +11,7 @@ import Navbar from "../Customer/Navbar/Navbar";
 import Footer from "../components/common/Footer";
 import NotFound from "../NotFound/NotFound";
 import PaymentResult from "../Customer/Booking/PaymentResult";
+import BookingConfirmation from "../Customer/Booking/BookingConfirmation";
 
 const CustomerRoutes = () => {
   return (
@@ -29,6 +30,7 @@ const CustomerRoutes = () => {
           <Route path="/salon/:id/categories" element={<SalonDetails />} />
           <Route path="/salon/:id/services" element={<SalonDetails />} />
           <Route path="/salon/:id/*" element={<SalonDetails />} />
+          <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
           <Route path="/payment-success/:orderId" element={<PaymentResult />} />
           <Route path="/payment/cancel" element={<PaymentResult cancelled />} />
           <Route path="*" element={<NotFound />} />

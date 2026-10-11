@@ -1,6 +1,7 @@
 package com.jay.booking_service.model;
 
 import com.jay.booking_service.domain.BookingStatus;
+import com.jay.booking_service.domain.PaymentMethod;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,4 +36,6 @@ public class Booking {
     private BookingStatus status = BookingStatus.PENDING;
 
     private int totalPrice;
+
+    private PaymentMethod paymentMethod;
 }

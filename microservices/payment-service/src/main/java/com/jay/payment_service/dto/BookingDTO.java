@@ -15,4 +15,5 @@ public class BookingDTO {
     private LocalDateTime endTime;
     private Set<Long> serviceIds;
     private int totalPrice;
+    private String serviceName;
 }

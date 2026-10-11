@@ -94,10 +94,12 @@ export default function BookingTables() {
   const filteredBookings = bookings.filter((b) => {
     const customerName = b.customer?.fullName || "";
     const customerEmail = b.customer?.email || "";
+    const customerPhone = b.customer?.phone || "";
     const idStr = String(b.id);
     const matchesSearch =
       customerName.toLowerCase().includes(search.toLowerCase()) ||
       customerEmail.toLowerCase().includes(search.toLowerCase()) ||
+      customerPhone.toLowerCase().includes(search.toLowerCase()) ||
       idStr.includes(search);
     const matchesStatus =
       statusFilter === "ALL" || b.status?.toUpperCase() === statusFilter;
@@ -139,7 +141,7 @@ export default function BookingTables() {
           />
           <input
             type="text"
-            placeholder="Search booking ID, customer name or email..."
+            placeholder="Search booking ID, customer name, email or phone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-amber-500 focus:bg-white text-slate-800 transition-colors"
@@ -206,6 +208,11 @@ export default function BookingTables() {
                     >
                       {b.status}
                     </span>
+                    {(b.paymentMethod === "CASH_ON_DELIVERY" || b.paymentMethod === "CASH") && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                        Cash on Visit
+                      </span>
+                    )}
                     <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                       <AccessTimeOutlined sx={{ fontSize: 14 }} className="text-slate-400" />
                       <span>{startTimeStr}</span>
@@ -224,12 +231,10 @@ export default function BookingTables() {
                         <span>{b.customer.email}</span>
                       </span>
                     )}
-                    {b.customer?.phone && (
-                      <span className="text-slate-500 flex items-center gap-1">
-                        <PhoneOutlined sx={{ fontSize: 13 }} />
-                        <span>{b.customer.phone}</span>
-                      </span>
-                    )}
+                    <span className="text-slate-500 flex items-center gap-1">
+                      <PhoneOutlined sx={{ fontSize: 13 }} />
+                      <span>{b.customer?.phone || "No phone added"}</span>
+                    </span>
                   </div>
 
                   {/* Services requested */}
@@ -274,13 +279,22 @@ export default function BookingTables() {
                     )}
 
                     {b.status === "CONFIRMED" && (
-                      <button
-                        onClick={() => updateStatus(b.id, "COMPLETED")}
-                        disabled={isUpdating}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        Mark Completed
-                      </button>
+                      <>
+                        <button
+                          onClick={() => updateStatus(b.id, "COMPLETED")}
+                          disabled={isUpdating}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          Mark Completed
+                        </button>
+                        <button
+                          onClick={() => updateStatus(b.id, "CANCELLED")}
+                          disabled={isUpdating}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                      </>
                     )}
 
                     {!["PENDING", "CONFIRMED"].includes(b.status) && (

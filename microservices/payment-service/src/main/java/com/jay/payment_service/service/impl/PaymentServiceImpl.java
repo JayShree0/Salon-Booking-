@@ -22,6 +22,11 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import com.jay.payment_service.dto.NotificationDTO;
+import com.jay.payment_service.dto.SalonDTO;
+import com.jay.payment_service.service.client.BookingFeignClient;
+import com.jay.payment_service.service.client.NotificationFeignClient;
+import com.jay.payment_service.service.client.SalonFeignClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +38,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentOrderRepository paymentOrderRepository;
     private final BookingEventProducer bookingEventProducer;
     private final NotificationEventProducer notificationEventProducer;
+    private final NotificationFeignClient notificationFeignClient;
+    private final BookingFeignClient bookingFeignClient;
+    private final SalonFeignClient salonFeignClient;
 
 
 
@@ -78,6 +86,18 @@ public class PaymentServiceImpl implements PaymentService {
 
         System.out.println("saved order --------------- "+ savedOrder);
         PaymentLinkResponse paymentLinkResponse = new PaymentLinkResponse();
+
+        if (paymentMethod.equals(PaymentMethod.CASH_ON_DELIVERY) || paymentMethod.equals(PaymentMethod.CASH)) {
+            String codId = "COD-" + booking.getId();
+            savedOrder.setPaymentLinkId(codId);
+            savedOrder.setStatus(PaymentOrderStatus.PENDING);
+            paymentOrderRepository.save(savedOrder);
+
+            paymentLinkResponse.setPayment_link_url(null);
+            paymentLinkResponse.setGetPayment_link_id(codId);
+            paymentLinkResponse.setBookingId(booking.getId());
+            return paymentLinkResponse;
+        }
 
         if (paymentMethod.equals(PaymentMethod.RAZORPAY)) {
             PaymentLink paymentLink = createRazorpayPaymentLink(
@@ -208,49 +228,150 @@ public class PaymentServiceImpl implements PaymentService {
 
         if(paymentOrder.getStatus().equals(PaymentOrderStatus.PENDING))
         {
-            if(paymentOrder.getPaymentMethod().equals(PaymentMethod.RAZORPAY)){
-                RazorpayClient razorpay = new RazorpayClient(razorpayApiKey, razorpayApiSecret);
+            boolean isPaid = false;
+            try {
+                if(paymentOrder.getPaymentMethod().equals(PaymentMethod.RAZORPAY)){
+                    RazorpayClient razorpay = new RazorpayClient(razorpayApiKey, razorpayApiSecret);
 
-                Payment payment = razorpay.payments.fetch(paymentId);
-                Integer amountPaid = payment.get("amount");
-                String status = payment.get("status");
+                    Payment payment = razorpay.payments.fetch(paymentId);
+                    String status = payment.get("status");
 
-                if(status.equals("captured")){
-                    // produce kafka event
-                    // produce the event for rabbitmq based on the payment method
+                    if("captured".equals(status)){
+                        isPaid = true;
+                    }
+                }
+                else{
+                    Stripe.apiKey = stripeSecretKey;
+                    Session session = Session.retrieve(paymentId);
+                    if ("paid".equals(session.getPaymentStatus())) {
+                        isPaid = true;
+                    }
+                }
+            } catch (Exception e) {
+                isPaid = false;
+            }
+
+            String serviceName = "Salon Service";
+            String salonName = "the salon";
+            try {
+                BookingDTO booking = bookingFeignClient.getBookingById(paymentOrder.getBookingId()).getBody();
+                if (booking != null && booking.getServiceName() != null && !booking.getServiceName().isBlank()) {
+                    serviceName = booking.getServiceName();
+                }
+            } catch (Exception ignored) {}
+
+            try {
+                SalonDTO salon = salonFeignClient.getSalonById(paymentOrder.getSalonId()).getBody();
+                if (salon != null && salon.getName() != null && !salon.getName().isBlank()) {
+                    salonName = salon.getName();
+                }
+            } catch (Exception ignored) {}
+
+            if (isPaid) {
+                // 1. Update Booking Status to CONFIRMED
+                try {
+                    bookingFeignClient.updateBookingStatus(paymentOrder.getBookingId(), "CONFIRMED");
+                } catch (Exception ignored) {}
+
+                // 2. Dispatch PAYMENT_SUCCESS notification to customer
+                try {
+                    NotificationDTO payNotif = new NotificationDTO();
+                    payNotif.setUserId(paymentOrder.getUserId());
+                    payNotif.setBookingId(paymentOrder.getBookingId());
+                    payNotif.setSalonId(paymentOrder.getSalonId());
+                    payNotif.setType("PAYMENT_SUCCESS");
+                    payNotif.setDescription("Payment of ₹" + paymentOrder.getAmount() + " for " + serviceName + " was successful.");
+                    notificationFeignClient.createNotification(payNotif);
+                } catch (Exception ignored) {}
+
+                // 3. Dispatch BOOKING_CONFIRMED notification to customer
+                try {
+                    NotificationDTO bookNotif = new NotificationDTO();
+                    bookNotif.setUserId(paymentOrder.getUserId());
+                    bookNotif.setBookingId(paymentOrder.getBookingId());
+                    bookNotif.setSalonId(paymentOrder.getSalonId());
+                    bookNotif.setType("BOOKING_CONFIRMED");
+                    bookNotif.setDescription("Your " + serviceName + " appointment has been confirmed by " + salonName + ".");
+                    notificationFeignClient.createNotification(bookNotif);
+                } catch (Exception ignored) {}
+
+                // 4. Fallback/legacy event publishing (guarded against message broker connection failure)
+                try {
                     bookingEventProducer.sendBookingUpdatedEvent(paymentOrder);
+                } catch (Exception ignored) {}
 
+                try {
                     notificationEventProducer.sentNotification(
                             paymentOrder.getBookingId(),
                             paymentOrder.getUserId(),
                             paymentOrder.getSalonId()
                     );
+                } catch (Exception ignored) {}
 
-                    paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
-                    paymentOrderRepository.save(paymentOrder);
-                    return true;
-                }
-                return false;
-            }
-            else{
-                Stripe.apiKey = stripeSecretKey;
-                Session session = Session.retrieve(paymentId);
-                if (!"paid".equals(session.getPaymentStatus())) {
-                    return false;
-                }
-
-                bookingEventProducer.sendBookingUpdatedEvent(paymentOrder);
-                notificationEventProducer.sentNotification(
-                        paymentOrder.getBookingId(),
-                        paymentOrder.getUserId(),
-                        paymentOrder.getSalonId()
-                );
                 paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
                 paymentOrderRepository.save(paymentOrder);
                 return true;
+            } else {
+                // Dispatch PAYMENT_FAILED notification to customer
+                try {
+                    NotificationDTO failNotif = new NotificationDTO();
+                    failNotif.setUserId(paymentOrder.getUserId());
+                    failNotif.setBookingId(paymentOrder.getBookingId());
+                    failNotif.setSalonId(paymentOrder.getSalonId());
+                    failNotif.setType("PAYMENT_FAILED");
+                    failNotif.setDescription("Payment of ₹" + paymentOrder.getAmount() + " for " + serviceName + " failed. Please retry payment.");
+                    notificationFeignClient.createNotification(failNotif);
+                } catch (Exception ignored) {}
+
+                paymentOrder.setStatus(PaymentOrderStatus.FAILED);
+                paymentOrderRepository.save(paymentOrder);
+                return false;
             }
         }
         return null;
+    }
+
+    @Override
+    public Boolean recordCashPayment(Long bookingId) {
+        PaymentOrder paymentOrder = paymentOrderRepository.findByBookingId(bookingId);
+        if (paymentOrder == null) {
+            return false;
+        }
+
+        // Only allow recording cash collection for COD payments
+        if (paymentOrder.getPaymentMethod() != PaymentMethod.CASH_ON_DELIVERY && paymentOrder.getPaymentMethod() != PaymentMethod.CASH) {
+            return false;
+        }
+
+        // Prevent duplicate updates
+        if (paymentOrder.getStatus() == PaymentOrderStatus.SUCCESS) {
+            return true;
+        }
+
+        paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
+        paymentOrderRepository.save(paymentOrder);
+
+        // Fetch service name for descriptive notification
+        String serviceName = "Salon Service";
+        try {
+            BookingDTO booking = bookingFeignClient.getBookingById(paymentOrder.getBookingId()).getBody();
+            if (booking != null && booking.getServiceName() != null && !booking.getServiceName().isBlank()) {
+                serviceName = booking.getServiceName();
+            }
+        } catch (Exception ignored) {}
+
+        // Dispatch PAYMENT_SUCCESS notification to customer
+        try {
+            NotificationDTO payNotif = new NotificationDTO();
+            payNotif.setUserId(paymentOrder.getUserId());
+            payNotif.setBookingId(paymentOrder.getBookingId());
+            payNotif.setSalonId(paymentOrder.getSalonId());
+            payNotif.setType("PAYMENT_SUCCESS");
+            payNotif.setDescription("Payment of ₹" + paymentOrder.getAmount() + " for " + serviceName + " was received in cash.");
+            notificationFeignClient.createNotification(payNotif);
+        } catch (Exception ignored) {}
+
+        return true;
     }
 
 }

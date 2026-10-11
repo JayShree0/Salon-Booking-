@@ -28,20 +28,6 @@ public class SalonNotificationController {
     @GetMapping("/salon/{salonId}")
     public ResponseEntity<List<NotificationDTO>> getNotificationsBySalonId(
             @PathVariable Long salonId) {
-        List<Notification> notifications = notificationService.getAllNotificationsBySalonId(salonId);
-
-        List<NotificationDTO> notificationDTOS = notifications.stream()
-                .map(notification -> {
-                    BookingDTO bookingDTO = null;
-                    try {
-                        bookingDTO = bookingFeignClient.getBookingsById(
-                                notification.getBookingId()).getBody();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    return NotificationMapper.toDTO(notification, bookingDTO);
-                }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(notificationDTOS);
+        return ResponseEntity.ok(notificationService.getAllNotificationsBySalonId(salonId));
     }
 }

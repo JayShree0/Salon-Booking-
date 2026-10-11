@@ -12,4 +12,6 @@ public interface PaymentOrderRepository extends JpaRepository<PaymentOrder, Long
     PaymentOrder findByPaymentLinkId(String paymentLinkId);
 
     List<PaymentOrder> findAllBySalonId(Long salonId);
+
+    PaymentOrder findByBookingId(Long bookingId);
 }

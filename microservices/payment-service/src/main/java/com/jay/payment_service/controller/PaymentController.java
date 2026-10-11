@@ -83,4 +83,12 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/cash/complete/{bookingId}")
+    public ResponseEntity<Boolean> completeCashPayment(
+            @PathVariable Long bookingId
+    ) throws Exception {
+        Boolean response = paymentService.recordCashPayment(bookingId);
+        return ResponseEntity.ok(response);
+    }
+
 }

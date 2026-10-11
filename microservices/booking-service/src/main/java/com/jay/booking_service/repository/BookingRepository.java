@@ -16,4 +16,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findBySalonIdAndBookingDate(Long salonId, LocalDate bookingDate);
 
+    List<Booking> findByStatusAndStartTimeBetween(com.jay.booking_service.domain.BookingStatus status, java.time.LocalDateTime start, java.time.LocalDateTime end);
 }

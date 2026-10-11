@@ -65,13 +65,28 @@ const Navbar = () => {
 
   // 2. Fetch unread notifications count if user is signed in
   useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
-    if (!jwt) return;
+    const fetchUnread = () => {
+      const jwt = localStorage.getItem("jwt");
+      if (!jwt) {
+        setUnreadCount(0);
+        return;
+      }
 
-    api
-      .get("/api/notifications/unread-count")
-      .then(({ data }) => setUnreadCount(typeof data === "number" ? data : 0))
-      .catch(() => setUnreadCount(0));
+      api
+        .get("/api/notifications/unread-count")
+        .then(({ data }) => setUnreadCount(typeof data === "number" ? data : 0))
+        .catch(() => setUnreadCount(0));
+    };
+
+    fetchUnread();
+
+    window.addEventListener("notifications-updated", fetchUnread);
+    const interval = setInterval(fetchUnread, 30000);
+
+    return () => {
+      window.removeEventListener("notifications-updated", fetchUnread);
+      clearInterval(interval);
+    };
   }, [user]);
 
   // 3. Listen for global "open-auth-modal" events from across the site

@@ -15,7 +15,8 @@ public interface UserFeignClient {
     //  Get User By ID
     @GetMapping("/api/users/{userId}")
     public ResponseEntity<UserDTO> getUserById(
-            @PathVariable("userId") Long id
+            @PathVariable("userId") Long id,
+            @RequestHeader(value = "Authorization", required = false) String jwt
     ) throws Exception;
 
 

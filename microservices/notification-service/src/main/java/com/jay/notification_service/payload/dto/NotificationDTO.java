@@ -25,4 +25,6 @@ public class NotificationDTO {
 
     private BookingDTO booking;
 
+    private String serviceName;
+
 }

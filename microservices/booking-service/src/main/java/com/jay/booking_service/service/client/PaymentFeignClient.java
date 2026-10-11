@@ -19,4 +19,9 @@ public interface PaymentFeignClient {
             @RequestParam PaymentMethod paymentMethod,
             @RequestHeader("Authorization") String jwt
     ) throws Exception;
+
+    @org.springframework.web.bind.annotation.PatchMapping("/api/payments/cash/complete/{bookingId}")
+    public ResponseEntity<Boolean> completeCashPayment(
+            @org.springframework.web.bind.annotation.PathVariable("bookingId") Long bookingId
+    );
 }

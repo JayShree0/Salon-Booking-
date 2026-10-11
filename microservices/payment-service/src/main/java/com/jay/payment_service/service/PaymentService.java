@@ -33,4 +33,6 @@ public interface PaymentService {
 
 
     Boolean processPayment(PaymentOrder paymentOrder, String paymentId, String paymentLinkId) throws Exception;
+
+    Boolean recordCashPayment(Long bookingId) throws Exception;
 }

@@ -145,10 +145,30 @@ const BookingCard = ({ booking, onCancel }) => {
           </div>
 
           <div className="space-y-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] font-mono font-bold text-slate-400 tracking-wider">
                 #BKG-{booking.id}
               </span>
+              {(booking.paymentMethod === "CASH_ON_DELIVERY" || booking.paymentMethod === "CASH") ? (
+                <>
+                  <span className="text-[10px] font-extrabold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    Pay at Salon
+                  </span>
+                  {booking.status !== "COMPLETED" && booking.status !== "CANCELLED" && booking.status !== "REJECTED" ? (
+                    <span className="text-[10px] font-extrabold text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-full border border-amber-300">
+                      Payment Pending
+                    </span>
+                  ) : booking.status === "COMPLETED" ? (
+                    <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      Paid at Salon
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                  {booking.paymentMethod === "RAZORPAY" ? "Razorpay" : booking.paymentMethod === "STRIPE" ? "Stripe" : "Online Payment"}
+                </span>
+              )}
             </div>
 
             <h3
@@ -252,18 +272,27 @@ const BookingCard = ({ booking, onCancel }) => {
 
       {/* 4. Action Row: View Salon & Cancel Booking */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
-        {/* View Salon Link */}
-        <button
-          type="button"
-          onClick={handleNavigateSalon}
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer group/link self-start"
-        >
-          <span>View Salon & Menu</span>
-          <ArrowForwardIcon
-            sx={{ fontSize: 14 }}
-            className="transform group-hover/link:translate-x-1 transition-transform"
-          />
-        </button>
+        {/* View Salon & Confirmation Links */}
+        <div className="flex items-center gap-4 flex-wrap self-start">
+          <button
+            type="button"
+            onClick={handleNavigateSalon}
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-amber-600 hover:text-amber-700 hover:underline cursor-pointer group/link"
+          >
+            <span>View Salon & Menu</span>
+            <ArrowForwardIcon
+              sx={{ fontSize: 14 }}
+              className="transform group-hover/link:translate-x-1 transition-transform"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(`/booking-confirmation/${booking.id}`)}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 hover:underline cursor-pointer"
+          >
+            <span>Confirmation & Receipt</span>
+          </button>
+        </div>
 
         {/* Cancellation or Status Actions */}
         {canCancel ? (

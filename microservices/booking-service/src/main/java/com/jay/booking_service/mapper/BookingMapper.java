@@ -17,6 +17,14 @@ public class BookingMapper {
         
         bookingDTO.setServiceIds(booking.getServiceIds());
         bookingDTO.setTotalPrice(booking.getTotalPrice());
+        bookingDTO.setPaymentMethod(booking.getPaymentMethod());
+        bookingDTO.setBookingDate(booking.getBookingDate());
+        return bookingDTO;
+    }
+
+    public static BookingDTO toDTO(Booking booking, String serviceName) {
+        BookingDTO bookingDTO = toDTO(booking);
+        bookingDTO.setServiceName(serviceName);
         return bookingDTO;
     }
 }

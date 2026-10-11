@@ -207,6 +207,8 @@ const SalonServiceDetails = ({ salon: propSalon }) => {
 
       if (data?.payment_link_url) {
         window.location.assign(data.payment_link_url);
+      } else if (data?.bookingId) {
+        navigate(`/booking-confirmation/${data.bookingId}`);
       } else {
         navigate("/bookings");
       }
@@ -541,6 +543,7 @@ const SalonServiceDetails = ({ salon: propSalon }) => {
             >
               <option value="RAZORPAY">Razorpay (Cards, UPI, NetBanking)</option>
               <option value="STRIPE">Stripe (International Credit Cards)</option>
+              <option value="CASH_ON_DELIVERY">Cash on Delivery (Pay at Salon)</option>
             </select>
           </div>
 
@@ -577,7 +580,7 @@ const SalonServiceDetails = ({ salon: propSalon }) => {
                   </>
                 ) : (
                   <>
-                    <span>Proceed to Payment</span>
+                    <span>{paymentMethod === "CASH_ON_DELIVERY" ? "Confirm & Pay at Salon" : "Proceed to Payment"}</span>
                     <ArrowForwardIcon sx={{ fontSize: 15 }} />
                   </>
                 )}

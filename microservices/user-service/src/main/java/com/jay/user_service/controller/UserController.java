@@ -55,7 +55,7 @@ public class UserController {
 
     //  Get User By ID
     @GetMapping("/api/users/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or @userServiceImp.isCurrentUser(#p0)")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SALON_OWNER') or @userServiceImp.isCurrentUser(#p0)")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable("userId") Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }

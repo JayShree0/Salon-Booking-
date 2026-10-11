@@ -8,7 +8,9 @@ import java.util.List;
 public interface NotificationService {
 
     NotificationDTO createNotification(Notification notification) throws Exception;
-    List<Notification> getAllNotificationsByUserId(Long userId);
-    List<Notification> getAllNotificationsBySalonId(Long salonId);
-    Notification markNotificationAsRead(Long notificationId) throws Exception;
+    List<NotificationDTO> getAllNotificationsByUserId(Long userId);
+    List<NotificationDTO> getAllNotificationsBySalonId(Long salonId);
+    NotificationDTO markNotificationAsRead(Long notificationId, Long authenticatedUserId) throws Exception;
+    int markAllNotificationsAsRead(Long userId);
+    long getUnreadCount(Long userId);
 }

@@ -1,4 +1,4 @@
-import React from "react";
+  import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@mui/material";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
@@ -9,6 +9,7 @@ import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsAc
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 /**
  * Helper to compute human-friendly relative time (e.g., "5m ago", "2h ago", "Oct 6").
@@ -45,6 +46,30 @@ const getNotificationTypeConfig = (type, description = "", status = "") => {
   const normalizedDesc = String(description || "").toUpperCase();
   const normalizedStatus = String(status || "").toUpperCase();
 
+  // 1. Refunds
+  if (normalizedType.includes("REFUND") || normalizedDesc.includes("REFUND")) {
+    return {
+      label: "Refund",
+      icon: <CurrencyRupeeIcon sx={{ fontSize: 18 }} />,
+      iconBoxClass: "bg-cyan-500/10 text-cyan-700 border border-cyan-500/20",
+      pillClass: "bg-cyan-50 text-cyan-800 border-cyan-200/80",
+    };
+  }
+
+  // 2. Payment Failure
+  if (
+    normalizedType.includes("PAYMENT_FAILED") ||
+    (normalizedType.includes("PAYMENT") && normalizedDesc.includes("FAIL"))
+  ) {
+    return {
+      label: "Payment Failed",
+      icon: <CancelOutlinedIcon sx={{ fontSize: 18 }} />,
+      iconBoxClass: "bg-rose-500/10 text-rose-600 border border-rose-500/20",
+      pillClass: "bg-rose-50 text-rose-700 border-rose-200/80",
+    };
+  }
+
+  // 3. Payment Success
   if (normalizedType.includes("PAYMENT") || normalizedDesc.includes("PAYMENT")) {
     return {
       label: "Payment",
@@ -54,19 +79,35 @@ const getNotificationTypeConfig = (type, description = "", status = "") => {
     };
   }
 
+  // 4. Reminders
+  if (normalizedType.includes("REMINDER") || normalizedDesc.includes("REMINDER")) {
+    return {
+      label: "Reminder",
+      icon: <AccessTimeOutlinedIcon sx={{ fontSize: 18 }} />,
+      iconBoxClass: "bg-indigo-500/10 text-indigo-600 border border-indigo-500/20",
+      pillClass: "bg-indigo-50 text-indigo-700 border-indigo-200/80",
+    };
+  }
+
+  // 5. Booking Cancelled / Rejected
   if (
     normalizedType.includes("CANCEL") ||
+    normalizedType.includes("REJECT") ||
     normalizedDesc.includes("CANCEL") ||
+    normalizedDesc.includes("DECLIN") ||
+    normalizedDesc.includes("REJECT") ||
     normalizedStatus === "CANCELLED"
   ) {
+    const isRejected = normalizedType.includes("REJECT") || normalizedDesc.includes("DECLIN");
     return {
-      label: "Cancelled",
+      label: isRejected ? "Declined" : "Cancelled",
       icon: <CancelOutlinedIcon sx={{ fontSize: 18 }} />,
       iconBoxClass: "bg-rose-500/10 text-rose-600 border border-rose-500/20",
       pillClass: "bg-rose-50 text-rose-700 border-rose-200/80",
     };
   }
 
+  // 6. Booking Confirmed
   if (
     normalizedType.includes("CONFIRM") ||
     normalizedDesc.includes("CONFIRM") ||
@@ -80,6 +121,7 @@ const getNotificationTypeConfig = (type, description = "", status = "") => {
     };
   }
 
+  // 7. Booking Created / Placed
   if (normalizedType.includes("BOOKING") || normalizedDesc.includes("BOOKING")) {
     return {
       label: "Booking",
@@ -89,12 +131,34 @@ const getNotificationTypeConfig = (type, description = "", status = "") => {
     };
   }
 
+  // 8. General Alert / Notice
   return {
     label: "Notice",
     icon: <NotificationsActiveOutlinedIcon sx={{ fontSize: 18 }} />,
     iconBoxClass: "bg-slate-500/10 text-slate-700 border border-slate-300/40",
     pillClass: "bg-slate-100 text-slate-700 border-slate-200",
   };
+};
+
+/**
+ * Human-friendly title based on notification event type.
+ */
+const formatNotificationTitle = (type, label) => {
+  if (!type) return label || "Notification";
+  const map = {
+    BOOKING_CREATED: "Booking Request Placed",
+    BOOKING_CONFIRMED: "Appointment Confirmed",
+    BOOKING_CANCELLED: "Appointment Cancelled",
+    BOOKING_REJECTED: "Booking Request Declined",
+    BOOKING_COMPLETED: "Appointment Completed",
+    APPOINTMENT_REMINDER: "Appointment Reminder",
+    PAYMENT_SUCCESS: "Payment Successful",
+    PAYMENT_FAILED: "Payment Failed",
+    REFUND_INITIATED: "Refund Initiated",
+    REFUND_PROCESSED: "Refund Processed",
+  };
+  if (map[type]) return map[type];
+  return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
 /**
@@ -108,17 +172,43 @@ const NotificationCard = ({ notification, onRead }) => {
   const booking = notification.booking;
   const timeAgo = formatTimeAgo(notification.createdAt);
 
+  const serviceLabel =
+    notification.serviceName ||
+    booking?.serviceName ||
+    "Appointment";
+
+  const displayDescription = React.useMemo(() => {
+    let desc = notification.description || "";
+    const name = notification.serviceName || booking?.serviceName;
+    if (name && desc) {
+      desc = desc.replace(/for booking #\d+/gi, `for ${name}`);
+      desc = desc.replace(/booking request #\d+/gi, `booking request for ${name}`);
+      desc = desc.replace(/upcoming appointment #\d+/gi, `upcoming ${name} appointment`);
+      desc = desc.replace(/appointment #\d+/gi, `${name} appointment`);
+      desc = desc.replace(/booking #\d+/gi, name);
+      desc = desc.replace(/with ID: \d+/gi, `for ${name}`);
+      desc = desc.replace(/#\d+/g, name);
+    }
+    return desc;
+  }, [notification.description, notification.serviceName, booking?.serviceName]);
+
   const typeConfig = getNotificationTypeConfig(
     notification.type,
-    notification.description,
+    displayDescription,
     booking?.status
   );
 
+  const displayTitle = formatNotificationTitle(notification.type, typeConfig.label);
+
   // Determine user role for routing
   const role = localStorage.getItem("role");
-  const isSalonOwner = role === "SALON_OWNER";
+  const isSalonOwner = role === "SALON_OWNER" || role === "ROLE_SALON_OWNER";
 
-  const handleViewTarget = () => {
+  const handleViewTarget = (e) => {
+    if (e) e.stopPropagation();
+    if (!isRead && onRead) {
+      onRead(notification);
+    }
     if (booking || notification.bookingId) {
       if (isSalonOwner) {
         navigate("/salon-dashboard/bookings");
@@ -132,7 +222,8 @@ const NotificationCard = ({ notification, onRead }) => {
 
   return (
     <div
-      className={`group relative rounded-2xl border transition-all duration-300 p-4 sm:p-5 text-left flex flex-col justify-between gap-3 ${
+      onClick={handleViewTarget}
+      className={`group relative rounded-2xl border transition-all duration-300 p-4 sm:p-5 text-left flex flex-col justify-between gap-3 cursor-pointer ${
         isRead
           ? "bg-white border-slate-200/80 hover:border-amber-400/60 shadow-2xs hover:shadow-md"
           : "bg-amber-50/25 border-amber-300/80 hover:border-amber-400 shadow-xs hover:shadow-lg"
@@ -163,7 +254,7 @@ const NotificationCard = ({ notification, onRead }) => {
                   isRead ? "font-semibold text-slate-800" : "font-extrabold text-slate-900"
                 }`}
               >
-                {notification.type || "Booking Notification"}
+                {displayTitle}
               </h4>
 
               {/* Pulsing Unread Indicator Dot */}
@@ -184,7 +275,7 @@ const NotificationCard = ({ notification, onRead }) => {
 
           {/* Message Description */}
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-            {notification.description}
+            {displayDescription}
           </p>
 
           {/* Booking Summary Pill (if booking object exists) */}
@@ -193,7 +284,7 @@ const NotificationCard = ({ notification, onRead }) => {
               <div className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 rounded-lg px-2.5 py-1 text-slate-700 text-xs font-medium">
                 <AccessTimeOutlinedIcon sx={{ fontSize: 13 }} className="text-amber-600" />
                 <span>
-                  Booking #{booking.id || notification.bookingId} ·{" "}
+                  {serviceLabel} ·{" "}
                   <strong className="text-slate-900">{booking.status}</strong>
                   {booking.startTime && (
                     <span className="text-slate-500 ml-1">
@@ -235,7 +326,10 @@ const NotificationCard = ({ notification, onRead }) => {
         {!isRead && onRead && (
           <button
             type="button"
-            onClick={() => onRead(notification)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRead(notification);
+            }}
             className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 shrink-0"
           >
             <DoneOutlinedIcon sx={{ fontSize: 13 }} />
@@ -251,21 +345,21 @@ const NotificationCard = ({ notification, onRead }) => {
  * Skeleton Loader for NotificationCard matching the website's luxury styling.
  */
 export const NotificationCardSkeleton = () => (
-  <div className="bg-white rounded-2xl border border-slate-100 p-4 sm:p-5 space-y-3">
+  <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white space-y-3">
     <div className="flex items-start gap-3.5">
-      <Skeleton variant="rounded" width={44} height={44} className="rounded-xl shrink-0" />
-      <div className="space-y-2 flex-1">
+      <Skeleton variant="rounded" width={40} height={40} sx={{ borderRadius: "12px" }} />
+      <div className="flex-1 space-y-2">
         <div className="flex justify-between items-center">
           <Skeleton variant="text" width="30%" height={20} />
           <Skeleton variant="text" width="15%" height={16} />
         </div>
-        <Skeleton variant="text" width="85%" height={18} />
+        <Skeleton variant="text" width="90%" height={16} />
         <Skeleton variant="text" width="60%" height={16} />
       </div>
     </div>
-    <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
-      <Skeleton variant="text" width={100} height={16} />
-      <Skeleton variant="rounded" width={80} height={24} className="rounded-full" />
+    <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+      <Skeleton variant="text" width="25%" height={16} />
+      <Skeleton variant="rounded" width={75} height={24} sx={{ borderRadius: "999px" }} />
     </div>
   </div>
 );

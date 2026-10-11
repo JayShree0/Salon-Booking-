@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import LoginIcon from "@mui/icons-material/Login";
 import NotificationCard, { NotificationCardSkeleton } from "./NotificationCard";
 import EmptyState from "../../components/common/EmptyState";
 import api from "../../config/api";
@@ -14,23 +15,37 @@ const Notifications = () => {
   const [filter, setFilter] = useState("all"); // 'all' | 'unread' | 'bookings' | 'payments'
   const [markingAll, setMarkingAll] = useState(false);
 
+  const isAuthenticated = Boolean(localStorage.getItem("jwt"));
+
   const loadNotifications = useCallback(async () => {
+    if (!localStorage.getItem("jwt")) {
+      setLoading(false);
+      setNotifications([]);
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
       let url;
-      if (localStorage.getItem("role") === "SALON_OWNER") {
+      const role = localStorage.getItem("role");
+      if (role === "SALON_OWNER" || role === "ROLE_SALON_OWNER") {
         const { data: salon } = await api.get("/api/salons/owner");
         url = `/api/notifications/salon-owner/salon/${salon.id}`;
       } else {
-        const { data: user } = await api.get("/api/users/profile");
-        url = `/api/notifications/user/${user.id}`;
+        url = "/api/notifications/customer";
       }
 
       const { data } = await api.get(url);
       setNotifications(data || []);
+      // Notify navbar to refresh unread count
+      window.dispatchEvent(new CustomEvent("notifications-updated"));
     } catch (requestError) {
-      setError(requestError.response?.data?.message || requestError.message || "Failed to load notifications.");
+      setError(
+        requestError.response?.data?.message ||
+          requestError.message ||
+          "Failed to load notifications."
+      );
     } finally {
       setLoading(false);
     }
@@ -44,8 +59,11 @@ const Notifications = () => {
     try {
       const { data } = await api.put(`/api/notifications/${notification.id}/read`);
       setNotifications((current) =>
-        current.map((item) => (item.id === notification.id ? { ...item, isRead: true, ...data } : item))
+        current.map((item) =>
+          item.id === notification.id ? { ...item, isRead: true, ...data } : item
+        )
       );
+      window.dispatchEvent(new CustomEvent("notifications-updated"));
     } catch (requestError) {
       setError(requestError.response?.data?.message || requestError.message);
     }
@@ -57,16 +75,26 @@ const Notifications = () => {
 
     setMarkingAll(true);
     try {
-      await Promise.allSettled(
-        unreadNotifications.map((item) =>
-          api.put(`/api/notifications/${item.id}/read`)
-        )
-      );
+      await api.put("/api/notifications/read-all");
       setNotifications((current) =>
         current.map((item) => ({ ...item, isRead: true }))
       );
+      window.dispatchEvent(new CustomEvent("notifications-updated"));
     } catch (requestError) {
-      setError(requestError.response?.data?.message || requestError.message);
+      // Fallback to individual updates if needed
+      try {
+        await Promise.allSettled(
+          unreadNotifications.map((item) =>
+            api.put(`/api/notifications/${item.id}/read`)
+          )
+        );
+        setNotifications((current) =>
+          current.map((item) => ({ ...item, isRead: true }))
+        );
+        window.dispatchEvent(new CustomEvent("notifications-updated"));
+      } catch (fallbackError) {
+        setError(fallbackError.response?.data?.message || fallbackError.message);
+      }
     } finally {
       setMarkingAll(false);
     }
@@ -77,12 +105,12 @@ const Notifications = () => {
   const bookingCount = notifications.filter((n) => {
     const t = String(n.type || "").toUpperCase();
     const d = String(n.description || "").toUpperCase();
-    return t.includes("BOOKING") || d.includes("BOOKING");
+    return t.includes("BOOKING") || d.includes("BOOKING") || t.includes("REMINDER");
   }).length;
   const paymentCount = notifications.filter((n) => {
     const t = String(n.type || "").toUpperCase();
     const d = String(n.description || "").toUpperCase();
-    return t.includes("PAYMENT") || d.includes("PAYMENT");
+    return t.includes("PAYMENT") || d.includes("PAYMENT") || t.includes("REFUND") || d.includes("REFUND");
   }).length;
 
   // Filtered notifications
@@ -91,12 +119,12 @@ const Notifications = () => {
     if (filter === "bookings") {
       const t = String(item.type || "").toUpperCase();
       const d = String(item.description || "").toUpperCase();
-      return t.includes("BOOKING") || d.includes("BOOKING");
+      return t.includes("BOOKING") || d.includes("BOOKING") || t.includes("REMINDER");
     }
     if (filter === "payments") {
       const t = String(item.type || "").toUpperCase();
       const d = String(item.description || "").toUpperCase();
-      return t.includes("PAYMENT") || d.includes("PAYMENT");
+      return t.includes("PAYMENT") || d.includes("PAYMENT") || t.includes("REFUND") || d.includes("REFUND");
     }
     return true;
   });
@@ -133,7 +161,7 @@ const Notifications = () => {
         </div>
 
         {/* 2. Category Filter Pills */}
-        {!loading && notifications.length > 0 && (
+        {!loading && isAuthenticated && notifications.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-2 border-b border-slate-100 pb-3">
             {[
               { id: "all", label: "All", count: notifications.length },
@@ -197,8 +225,23 @@ const Notifications = () => {
           </div>
         )}
 
+        {/* Unauthenticated State */}
+        {!loading && !isAuthenticated && (
+          <EmptyState
+            icon="🔒"
+            title="Sign in to view notifications"
+            description="Log in with your account to check booking confirmations, appointment reminders, and payment updates."
+            actionText="Sign In"
+            onAction={() =>
+              window.dispatchEvent(
+                new CustomEvent("open-auth-modal", { detail: { mode: "login" } })
+              )
+            }
+          />
+        )}
+
         {/* Empty State: Completely caught up */}
-        {!loading && !error && notifications.length === 0 && (
+        {!loading && !error && isAuthenticated && notifications.length === 0 && (
           <EmptyState
             icon="🔔"
             title="You're all caught up!"
@@ -209,19 +252,24 @@ const Notifications = () => {
         )}
 
         {/* Filtered Empty State: No results for selected filter */}
-        {!loading && !error && notifications.length > 0 && filteredNotifications.length === 0 && (
-          <EmptyState
-            icon="✨"
-            title={`No ${filter} notifications`}
-            description={`You don't have any notifications under the "${filter}" filter.`}
-            actionText="View All Notifications"
-            onAction={() => setFilter("all")}
-          />
-        )}
+        {!loading &&
+          !error &&
+          isAuthenticated &&
+          notifications.length > 0 &&
+          filteredNotifications.length === 0 && (
+            <EmptyState
+              icon="✨"
+              title={`No ${filter} notifications`}
+              description={`You don't have any notifications under the "${filter}" filter.`}
+              actionText="View All Notifications"
+              onAction={() => setFilter("all")}
+            />
+          )}
 
         {/* Render Filtered Notifications */}
         {!loading &&
           !error &&
+          isAuthenticated &&
           filteredNotifications.map((notification) => (
             <NotificationCard
               key={notification.id}
