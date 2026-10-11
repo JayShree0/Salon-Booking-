@@ -26,6 +26,4 @@ public class RabbitMQConfig {
     public Queue bookingQueue() {
         return new Queue("booking-queue");
     }
-
-
 }

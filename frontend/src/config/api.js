@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:5000"
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://3.111.51.3.sslip.io";
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -39,6 +39,10 @@ const isPublicEndpoint = (method, url) => {
 };
 
 api.interceptors.request.use((config) => {
+    config.metadata = { startTime: new Date().getTime() };
+    const method = config.method?.toUpperCase() || "GET";
+    console.log(`%c[API REQ] ${method} ${config.url}`, "color: #3b82f6; font-weight: bold;");
+
     const jwt = localStorage.getItem("jwt");
 
     if (jwt && jwt !== "null" && jwt !== "undefined" && !isPublicEndpoint(config.method, config.url)) {
@@ -51,8 +55,20 @@ api.interceptors.request.use((config) => {
 let refreshRequest = null;
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        const startTime = response.config?.metadata?.startTime || new Date().getTime();
+        const duration = new Date().getTime() - startTime;
+        const method = response.config?.method?.toUpperCase() || "GET";
+        console.log(`%c[API RES] ${method} ${response.config?.url} [${response.status}] in ${duration}ms`, "color: #10b981; font-weight: bold;");
+        return response;
+    },
     async (error) => {
+        const startTime = error.config?.metadata?.startTime || new Date().getTime();
+        const duration = new Date().getTime() - startTime;
+        const method = error.config?.method?.toUpperCase() || "GET";
+        const status = error.response?.status || "ERROR";
+        console.warn(`%c[API ERR] ${method} ${error.config?.url} [${status}] in ${duration}ms`, "color: #ef4444; font-weight: bold;", error.response?.data || error.message);
+
         const request = error.config;
 
         if (error.response?.status !== 401 || !request || request._retry || request.url?.startsWith("/auth/")) {
