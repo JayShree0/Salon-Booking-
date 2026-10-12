@@ -31,7 +31,7 @@ public class User {
     @NotBlank(message = "username is mandatory")
     private String username;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = com.jay.user_service.domain.UserRoleConverter.class)
     @Column(nullable = false)
     private UserRole role;
 
